@@ -1,9 +1,11 @@
+import Stripe from 'stripe';
+
 export async function onRequestOptions(context) {
   return new Response(null, { headers: corsHeaders() });
 }
 
 export async function onRequestPost(context) {
-  const stripe = require('stripe')(context.env.STRIPE_SECRET_KEY);
+  const stripe = new Stripe(context.env.STRIPE_SECRET_KEY);
   
   try {
     const { amount, metadata = {} } = await context.request.json();
