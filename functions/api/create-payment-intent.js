@@ -1,16 +1,11 @@
 import Stripe from 'stripe';
 
-export async function onRequest(context) {
+export async function onRequestOptions(context) {
+  return new Response(null, { headers: corsHeaders() });
+}
+
+export async function onRequestPost(context) {
   const { request, env } = context;
-
-  // Handle CORS preflight
-  if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders() });
-  }
-
-  if (request.method !== 'POST') {
-    return new Response('Method Not Allowed', { status: 405 });
-  }
 
   try {
     const stripe = new Stripe(env.STRIPE_SECRET_KEY);
