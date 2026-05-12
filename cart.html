@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Order — Very Ghood</title>
+  <meta name="description" content="Review your Very Ghood order and checkout." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="assets/logo.png" alt="Very Ghood" />
+        <span class="nav__brand">Very Ghood</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav__right">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MOBILE NAV -->
+  <div class="nav__mobile" id="mobile-nav">
+    <a href="menu.html">Menu</a>
+    <a href="catering.html">Catering</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+    <header class="page-header">
+      <p class="page-header__label">Your Order</p>
+      <h1 class="page-header__title">Review &amp; Checkout</h1>
+    </header>
+
+    <section class="cart-section">
+      <div class="container">
+
+        <!-- Empty state -->
+        <div id="cart-empty" class="cart-empty hidden">
+          Your cart is empty. <a href="menu.html" style="color:var(--red);text-decoration:underline;">Back to menu →</a>
+        </div>
+
+        <!-- Cart with items -->
+        <div id="cart-content" class="cart-layout hidden">
+
+          <!-- LEFT — Items -->
+          <div>
+            <div id="cart-items-list"></div>
+
+            <!-- Notes -->
+            <div class="form-group" style="margin-top:2rem;">
+              <label class="form-label" for="order-notes">Order Notes</label>
+              <textarea class="form-input form-textarea" id="order-notes" placeholder="Allergies, special requests, pickup time preferences..."></textarea>
+            </div>
+          </div>
+
+          <!-- RIGHT — Checkout Panel -->
+          <div class="checkout-panel">
+            <h2 class="checkout-panel__title">Order Summary</h2>
+
+            <div id="summary-rows"></div>
+
+            <div class="summary-row total">
+              <span>Total</span>
+              <span id="summary-total">$0.00</span>
+            </div>
+
+            <!-- Payment Method Toggle -->
+            <div class="payment-toggle">
+              <p class="payment-toggle__label">Payment Method</p>
+              <div class="toggle-options">
+                <button class="toggle-option active" id="toggle-online" type="button">Pay Online</button>
+                <button class="toggle-option" id="toggle-cash" type="button">Cash at Pickup</button>
+              </div>
+            </div>
+
+            <!-- Customer Info -->
+            <div class="form-group">
+              <label class="form-label" for="checkout-name">Full Name</label>
+              <input class="form-input" type="text" id="checkout-name" placeholder="Your name" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="checkout-phone">Phone</label>
+              <input class="form-input" type="tel" id="checkout-phone" placeholder="(816) 000-0000" />
+            </div>
+
+            <!-- Online payment area -->
+            <div id="online-payment-area">
+              <div class="payment-placeholder">
+                Payment processor coming soon.<br />Card payment will be processed here.
+              </div>
+            </div>
+
+            <!-- Cash notice -->
+            <div id="cash-notice" class="hidden">
+              <div class="deposit-notice" style="margin-bottom:1rem;">
+                <p class="deposit-notice__title">Cash at Pickup</p>
+                <p class="deposit-notice__text">
+                  Bring exact cash or payment when you pick up your order.
+                  We will message you with the pickup address.
+                </p>
+              </div>
+            </div>
+
+            <p id="cart-error" class="hidden" style="color:var(--red);font-family:var(--font-primary);font-size:0.78rem;margin-bottom:1rem;letter-spacing:0.05em;"></p>
+            <button class="btn btn-red btn-full" id="place-order-btn" type="button">
+              Place Order
+            </button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="year"></span> Very Ghood. All rights reserved.</p>
+      <ul class="footer__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/cart.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+    });
+    mobileNav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+      });
+    });
+
+    // Toggle payment method
+    const toggleOnline = document.getElementById('toggle-online');
+    const toggleCash   = document.getElementById('toggle-cash');
+    const onlineArea   = document.getElementById('online-payment-area');
+    const cashNotice   = document.getElementById('cash-notice');
+
+    toggleOnline.addEventListener('click', () => {
+      toggleOnline.classList.add('active');
+      toggleCash.classList.remove('active');
+      onlineArea.classList.remove('hidden');
+      cashNotice.classList.add('hidden');
+    });
+    toggleCash.addEventListener('click', () => {
+      toggleCash.classList.add('active');
+      toggleOnline.classList.remove('active');
+      cashNotice.classList.remove('hidden');
+      onlineArea.classList.add('hidden');
+    });
+  </script>
+</body>
+</html>

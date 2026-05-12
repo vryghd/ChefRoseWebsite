@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menu — Very Ghood</title>
+  <meta name="description" content="Order from the Very Ghood everyday menu. Fresh food by Chef Rose — pay online or cash at pickup." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="assets/logo.png" alt="Very Ghood" />
+        <span class="nav__brand">Very Ghood</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="menu.html" class="active">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav__right">
+        <a href="cart.html" class="cart-btn" id="nav-cart-btn">
+          Cart <span class="cart-count" id="nav-cart-count"></span>
+        </a>
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MOBILE NAV -->
+  <div class="nav__mobile" id="mobile-nav">
+    <a href="menu.html">Menu</a>
+    <a href="catering.html">Catering</a>
+    <a href="contact.html">Contact</a>
+    <a href="cart.html">Cart</a>
+  </div>
+
+  <main>
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+      <p class="page-header__label">Everyday Menu</p>
+      <h1 class="page-header__title">What's Good Today</h1>
+      <p class="page-header__desc">Fresh plates by Chef Rose. Order online or choose cash at pickup.</p>
+    </header>
+
+    <!-- MENU SECTION -->
+    <section class="menu-section">
+      <div class="container">
+        <!-- Category Tabs — populated by menu.js -->
+        <div class="category-tabs" id="category-tabs" role="tablist"></div>
+        <!-- Menu Items — populated by menu.js -->
+        <div class="menu-items" id="menu-items" role="list">
+          <div class="loading-state">Loading menu&hellip;</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="year"></span> Very Ghood. All rights reserved.</p>
+      <ul class="footer__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/cart.js"></script>
+  <script src="js/menu.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+    });
+    mobileNav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>

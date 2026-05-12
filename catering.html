@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Catering — Very Ghood</title>
+  <meta name="description" content="Book Chef Rose for your next event. A $250 deposit holds your date — applied to your total." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="assets/logo.png" alt="Very Ghood" />
+        <span class="nav__brand">Very Ghood</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html" class="active">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav__right">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MOBILE NAV -->
+  <div class="nav__mobile" id="mobile-nav">
+    <a href="menu.html">Menu</a>
+    <a href="catering.html">Catering</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+    <!-- PAGE HEADER -->
+    <header class="page-header">
+      <p class="page-header__label">Private Catering</p>
+      <h1 class="page-header__title">Book Chef Rose</h1>
+      <p class="page-header__desc">Weddings, private dinners, corporate events, and more. Chef Rose brings the experience to you.</p>
+    </header>
+
+    <!-- CATERING SECTION -->
+    <section class="catering-section">
+      <div class="container">
+        <div class="catering-layout">
+
+          <!-- LEFT — Info -->
+          <div class="catering-info">
+            <p class="catering-info__label">The Experience</p>
+            <h2 class="catering-info__heading">More than a meal — an event</h2>
+            <p class="catering-info__body" id="catering-description">
+              <!-- Content coming soon — add your description here -->
+              We bring the kitchen to you. Whether it's an intimate dinner or a full event spread, Chef Rose crafts every plate with care. Details and packages coming soon — fill out the form to inquire.
+            </p>
+            <div class="catering-divider"></div>
+
+            <!-- Deposit Notice -->
+            <div class="deposit-notice">
+              <p class="deposit-notice__title">$250 Deposit Required</p>
+              <p class="deposit-notice__text">
+                A $250 deposit is required at the time of booking to hold your date.
+                This amount is applied directly to your total catering balance.
+              </p>
+            </div>
+
+            <!-- Packages placeholder -->
+            <div id="catering-packages">
+              <!-- Packages will be added here -->
+            </div>
+          </div>
+
+          <!-- RIGHT — Booking Form -->
+          <div class="booking-form" id="booking-form-wrapper">
+            <h3 class="booking-form__title">Request a Booking</h3>
+            <form id="catering-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="first-name">First Name</label>
+                  <input class="form-input" type="text" id="first-name" name="first_name" required placeholder="First" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="last-name">Last Name</label>
+                  <input class="form-input" type="text" id="last-name" name="last_name" required placeholder="Last" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Email</label>
+                <input class="form-input" type="email" id="email" name="email" required placeholder="you@email.com" />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="phone">Phone</label>
+                <input class="form-input" type="tel" id="phone" name="phone" placeholder="(000) 000-0000" />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="event-date">Event Date</label>
+                  <input class="form-input" type="date" id="event-date" name="event_date" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="guest-count">Guest Count</label>
+                  <input class="form-input" type="number" id="guest-count" name="guest_count" min="1" placeholder="e.g. 50" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="event-type">Event Type</label>
+                <select class="form-input form-select" id="event-type" name="event_type">
+                  <option value="">Select an event type</option>
+                  <option value="wedding">Wedding</option>
+                  <option value="birthday">Birthday / Celebration</option>
+                  <option value="corporate">Corporate Event</option>
+                  <option value="private-dinner">Private Dinner</option>
+                  <option value="popup">Pop-Up / Community Event</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="notes">Special Requests / Notes</label>
+                <textarea class="form-input form-textarea" id="notes" name="notes" placeholder="Dietary restrictions, vibe, theme, anything we should know..."></textarea>
+              </div>
+
+              <!-- Deposit Payment Placeholder -->
+              <div class="payment-placeholder" id="deposit-payment-area">
+                Payment processor coming soon.<br/>Your deposit of $250 will be charged here.
+              </div>
+
+              <p id="catering-form-error" class="hidden" style="color:var(--red);font-family:var(--font-primary);font-size:0.78rem;margin-bottom:1rem;letter-spacing:0.05em;"></p>
+              <button type="submit" class="btn btn-red btn-full" id="catering-submit-btn">
+                Submit &amp; Pay $250 Deposit
+              </button>
+            </form>
+
+            <!-- Success State -->
+            <div id="catering-success" class="hidden" style="text-align:center;padding:2rem 0;">
+              <p style="font-family:var(--font-secondary);font-size:1.75rem;font-style:italic;margin-bottom:1rem;">Request Received</p>
+              <p style="font-family:var(--font-body);font-size:0.9rem;color:var(--gray-600);line-height:1.7;">
+                Thank you — your $250 deposit has been submitted and your date is being held.
+                Chef Rose will be in touch within 24 hours to confirm details.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="year"></span> Very Ghood. All rights reserved.</p>
+      <ul class="footer__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/catering.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+    });
+    mobileNav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>

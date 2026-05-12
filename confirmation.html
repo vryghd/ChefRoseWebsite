@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Confirmed — Very Ghood</title>
+  <meta name="description" content="Your Very Ghood order has been placed." />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/logo.png" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="assets/logo.png" alt="Very Ghood" />
+        <span class="nav__brand">Very Ghood</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav__right">
+        <button class="hamburger" id="hamburger" aria-label="Menu">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="nav__mobile" id="mobile-nav">
+    <a href="menu.html">Menu</a>
+    <a href="catering.html">Catering</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+    <section class="confirmation-section">
+      <div class="confirmation-box">
+        <div class="confirmation-icon">✓</div>
+        <h1>Order Placed</h1>
+        <p>Thank you — your order has been received.</p>
+        <p id="conf-payment-note" class="text-muted"></p>
+        <div class="confirmation-divider"></div>
+
+        <!-- Order Summary -->
+        <div class="confirmation-summary" id="conf-summary"></div>
+
+        <div style="margin-top:2rem;">
+          <a href="menu.html" class="btn btn-outline btn-full">Order Again</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="year"></span> Very Ghood. All rights reserved.</p>
+      <ul class="footer__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // Load order from sessionStorage
+    const order = JSON.parse(sessionStorage.getItem('vg_last_order') || '{}');
+    const summaryEl = document.getElementById('conf-summary');
+    const noteEl    = document.getElementById('conf-payment-note');
+
+    if (order.items && order.items.length) {
+      order.items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'conf-row';
+        row.innerHTML = `<span>${item.name} x${item.qty}</span><span>$${(item.price * item.qty).toFixed(2)}</span>`;
+        summaryEl.appendChild(row);
+      });
+      const totalRow = document.createElement('div');
+      totalRow.className = 'conf-row';
+      totalRow.innerHTML = `<span>Total</span><span>$${order.total}</span>`;
+      summaryEl.appendChild(totalRow);
+
+      if (order.paymentMethod === 'cash') {
+        noteEl.textContent = 'Payment is due in cash at pickup. We'll message you with the pickup address.';
+      } else {
+        noteEl.textContent = 'Payment has been processed. Check your email for a receipt.';
+      }
+    } else {
+      summaryEl.innerHTML = '<p class="text-muted" style="font-family:var(--font-body);font-size:0.9rem;">No order details found.</p>';
+    }
+
+    // Hamburger
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+    });
+  </script>
+</body>
+</html>
