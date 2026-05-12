@@ -30,8 +30,15 @@ const CONFIG = {
   // ── Catering Deposit ───────────────────────────────────────
   DEPOSIT_AMOUNT: 250,
 
+  // ── Gallery Photos ──────────────────────────────────────────
+  // Add filenames here as you drop images into assets/photos/
+  // Example: 'jerk-chicken.jpg', 'oxtail-bowl.jpg'
+  GALLERY_PHOTOS: [
+    // 'filename.jpg',
+  ],
+
   // ── Sample menu data (used when Sheets URL is not set) ─────
   SAMPLE_MENU: [
-    { category: 'Entrees', name: 'Item Coming Soon', description: 'Menu managed via Google Sheets', price: 0.00, available: false, image: '' }
+    { category: 'Entrees', name: 'Item Coming Soon', description: 'Menu managed via Google Sheets', price: 0.00 }
   ]
 };

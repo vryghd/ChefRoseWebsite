@@ -1,6 +1,7 @@
 // ============================================================
 // VERY GHOOD — menu.js
 // Fetches menu from Google Sheets JSON and renders it
+// Columns: category | name | description | price
 // ============================================================
 
 (async function () {
@@ -21,23 +22,15 @@
     try {
       const res  = await fetch(url);
       const json = await res.json();
-
-      // Google Sheets published JSON format
-      // Columns: Category, Name, Description, Price, Available, Image
       const rows = json.values || json.feed?.entry || [];
 
-      // Handle Apps Script output (array of objects)
       if (Array.isArray(rows) && typeof rows[0] === 'object' && !Array.isArray(rows[0])) {
-        return rows
-          .filter(r => String(r.available).toUpperCase() !== 'FALSE')
-          .map(r => ({
-            category:    r.category    || r.Category    || 'Other',
-            name:        r.name        || r.Name        || '',
-            description: r.description || r.Description || '',
-            price:       parseFloat(r.price || r.Price  || 0),
-            available:   String(r.available || r.Available).toUpperCase() !== 'FALSE',
-            image:       r.image       || r.Image       || '',
-          }));
+        return rows.map(r => ({
+          category:    r.category    || r.Category    || 'Other',
+          name:        r.name        || r.Name        || '',
+          description: r.description || r.Description || '',
+          price:       parseFloat(r.price || r.Price  || 0),
+        }));
       }
 
       return CONFIG.SAMPLE_MENU;
@@ -47,13 +40,12 @@
     }
   }
 
-  // ── Render categories ────────────────────────────────────
+  // ── Render category tabs ──────────────────────────────────
   function renderTabs(categories, activeCategory) {
     tabsEl.innerHTML = '';
 
-    // "All" tab
     const allBtn = document.createElement('button');
-    allBtn.className  = 'tab-btn' + (activeCategory === 'All' ? ' active' : '');
+    allBtn.className   = 'tab-btn' + (activeCategory === 'All' ? ' active' : '');
     allBtn.textContent = 'All';
     allBtn.setAttribute('role', 'tab');
     allBtn.dataset.category = 'All';
@@ -62,7 +54,7 @@
 
     categories.forEach(cat => {
       const btn = document.createElement('button');
-      btn.className  = 'tab-btn' + (activeCategory === cat ? ' active' : '');
+      btn.className   = 'tab-btn' + (activeCategory === cat ? ' active' : '');
       btn.textContent = cat;
       btn.setAttribute('role', 'tab');
       btn.dataset.category = cat;
@@ -71,9 +63,8 @@
     });
   }
 
-  // ── Render items ─────────────────────────────────────────
+  // ── Render menu items ─────────────────────────────────────
   function renderMenu(category = 'All') {
-    // Update active tab
     tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
       btn.classList.toggle('active', btn.dataset.category === category);
     });
@@ -93,12 +84,7 @@
       el.className = 'menu-item';
       el.setAttribute('role', 'listitem');
 
-      const imgHTML = item.image
-        ? `<div class="menu-item__photo"><img src="${item.image}" alt="${item.name}" loading="lazy" /></div>`
-        : `<div class="menu-item__photo"><span>Photo</span></div>`;
-
       el.innerHTML = `
-        ${imgHTML}
         <div class="menu-item__info">
           <p class="menu-item__name">${item.name}</p>
           ${item.description ? `<p class="menu-item__desc">${item.description}</p>` : ''}
@@ -111,9 +97,8 @@
         </div>
       `;
 
-      // Add to cart
       el.querySelector('.add-btn').addEventListener('click', function () {
-        Cart.add({ name: item.name, price: item.price, image: item.image });
+        Cart.add({ name: item.name, price: item.price });
         this.textContent = 'Added ✓';
         this.classList.add('added');
         setTimeout(() => {
@@ -129,9 +114,6 @@
   // ── Init ─────────────────────────────────────────────────
   itemsEl.innerHTML = '<div class="loading-state">Loading menu&hellip;</div>';
   menuData = await fetchMenu();
-
-  const availableItems = menuData.filter(i => i.available !== false);
-  menuData = availableItems;
 
   const categories = [...new Set(menuData.map(i => i.category))];
   renderTabs(categories, 'All');
