@@ -201,6 +201,14 @@
       reqCountEl.textContent = `${total} / ${required} selected`;
       reqCountEl.classList.toggle('complete', total === required);
       errorEl.classList.add('hidden');
+
+      // Cap the + buttons in the required section at the required total
+      const atLimit = total >= required;
+      reqListEl.querySelectorAll('.stepper-btn.inc').forEach(btn => {
+        btn.disabled = atLimit;
+        btn.style.opacity = atLimit ? '0.3' : '';
+        btn.style.cursor  = atLimit ? 'not-allowed' : '';
+      });
     }
 
     function updateExtUI() {
