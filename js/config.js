@@ -10,9 +10,6 @@ const CONFIG = {
   // paste the published JSON URL here.
   SHEETS_URL: 'YOUR_GOOGLE_SHEETS_JSON_URL_HERE',
 
-  // ── Payment Processor ──────────────────────────────────────
-  // Uncomment and fill in when you choose a processor.
-
   // ── Stripe ─────────────────────────────────────────────────
   // Paste your Stripe publishable key (starts with pk_live_ or pk_test_)
   STRIPE_PUBLIC_KEY: 'pk_test_XXXXXXXXXXXXXXXXXXXX',

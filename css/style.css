@@ -846,6 +846,7 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   text-transform: uppercase;
   color: var(--black);
 }
+.sides-section__title--spaced { margin-bottom: 0.6rem; }
 .sides-section__note {
   font-family: var(--font-body);
   font-size: 0.78rem;

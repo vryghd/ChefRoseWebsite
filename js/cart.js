@@ -18,19 +18,25 @@ const Cart = (() => {
 
   function add(item) {
     const items = getItems();
-    // Use name + sorted sides as unique key so same entrée with diff sides coexist
-    const sidesKey = (item.sides || []).slice().sort().join('|');
-    const key = item.name + (sidesKey ? '::' + sidesKey : '');
+    // Unique key includes name, sides, extras, meat, notes so each combination is a separate line item
+    const sidesKey    = (item.sides      || []).slice().sort().join('|');
+    const extSidesKey = (item.extraSides || []).slice().sort().join('|');
+    const meatKey     = item.extraMeat ? '1' : '0';
+    const key         = [item.name, sidesKey, extSidesKey, meatKey, item.notes || ''].join('::');
+
     const existing = items.find(i => i._key === key);
     if (existing) {
       existing.qty += 1;
     } else {
       items.push({
-        _key:  key,
-        name:  item.name,
-        price: item.price,
-        sides: item.sides || [],
-        qty:   1,
+        _key:       key,
+        name:       item.name,
+        price:      item.price,
+        sides:      item.sides      || [],
+        extraSides: item.extraSides || [],
+        extraMeat:  item.extraMeat  || false,
+        notes:      item.notes      || '',
+        qty:        1,
       });
     }
     saveItems(items);

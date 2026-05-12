@@ -123,7 +123,6 @@
     const subEl      = document.getElementById('sides-modal-sub');
     const reqListEl  = document.getElementById('sides-list');
     const extListEl  = document.getElementById('extra-sides-list');
-    const meatRowEl  = document.getElementById('extra-meat-row');
     const meatLblEl  = document.getElementById('extra-meat-label');
     const notesEl    = document.getElementById('sides-notes');
     const errorEl    = document.getElementById('sides-error');
@@ -268,6 +267,7 @@
       sidesPool.forEach(s => { reqMap[s] = 0; extMap[s] = 0; });
       confirmBtn.removeEventListener('click', handleConfirm);
       cancelBtn.removeEventListener('click', closeModal);
+      closeXBtn.removeEventListener('click', closeModal);
     }
 
     confirmBtn.addEventListener('click', handleConfirm);
