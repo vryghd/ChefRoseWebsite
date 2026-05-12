@@ -13,12 +13,12 @@ const CONFIG = {
   // ── Payment Processor ──────────────────────────────────────
   // Uncomment and fill in when you choose a processor.
 
-  // --- Stripe ---
-  // STRIPE_PUBLIC_KEY: 'pk_live_XXXXXXXXXXXXXXXXXXXX',
+  // ── Stripe ─────────────────────────────────────────────────
+  // Paste your Stripe publishable key (starts with pk_live_ or pk_test_)
+  STRIPE_PUBLIC_KEY: 'pk_test_XXXXXXXXXXXXXXXXXXXX',
 
-  // --- Square ---
-  // SQUARE_APP_ID: 'sq0idp-XXXXXXXXXXXXXXXXXXXX',
-  // SQUARE_LOCATION_ID: 'XXXXXXXXXXXXXXXX',
+  // Serverless function endpoint (works on Netlify automatically)
+  PAYMENT_INTENT_URL: '/api/create-payment-intent',
 
   // ── Business Info ──────────────────────────────────────────
   PHONE:  '(816) 606-1850',

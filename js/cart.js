@@ -1,6 +1,6 @@
 // ============================================================
 // VERY GHOOD — cart.js
-// localStorage cart — shared across all pages
+// localStorage cart + Stripe Payment Element checkout
 // ============================================================
 
 const Cart = (() => {
@@ -52,13 +52,48 @@ const Cart = (() => {
     return getItems().reduce((sum, i) => sum + i.qty, 0);
   }
 
-  // Update cart badge in nav
   function updateNavCount() {
     const badge = document.getElementById('nav-cart-count');
     if (!badge) return;
     const n = count();
     badge.textContent = n;
     badge.classList.toggle('visible', n > 0);
+  }
+
+  // ── Stripe state ────────────────────────────────────────
+  let stripe        = null;
+  let elements      = null;
+  let paymentElement = null;
+
+  async function initStripe(amount) {
+    const onlineArea = document.getElementById('online-payment-area');
+    if (!onlineArea) return;
+
+    onlineArea.innerHTML = '<div class="loading-state" style="padding:1rem 0;">Loading payment form…</div>';
+
+    try {
+      stripe = Stripe(CONFIG.STRIPE_PUBLIC_KEY);
+
+      // Create PaymentIntent via serverless function
+      const res = await fetch(CONFIG.PAYMENT_INTENT_URL, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ amount, metadata: { source: 'menu-order' } }),
+      });
+      const { clientSecret, error } = await res.json();
+
+      if (error) throw new Error(error);
+
+      elements = stripe.elements({ clientSecret, appearance: stripeAppearance() });
+      paymentElement = elements.create('payment');
+
+      onlineArea.innerHTML = '<div id="stripe-payment-element"></div>';
+      paymentElement.mount('#stripe-payment-element');
+
+    } catch (err) {
+      onlineArea.innerHTML = `<div class="payment-placeholder">Payment form unavailable. Please use Cash at Pickup or contact us directly.</div>`;
+      console.error('Stripe init error:', err);
+    }
   }
 
   // ── Cart page rendering ─────────────────────────────────
@@ -82,7 +117,7 @@ const Cart = (() => {
     emptyEl.classList.add('hidden');
     contentEl.classList.remove('hidden');
 
-    // Render items list
+    // Items list
     listEl.innerHTML = '';
     items.forEach(item => {
       const el = document.createElement('div');
@@ -93,21 +128,18 @@ const Cart = (() => {
           <p class="cart-item__unit">$${item.price.toFixed(2)} each</p>
         </div>
         <div class="cart-item__controls">
-          <button class="qty-btn" data-action="dec" data-name="${item.name}" aria-label="Decrease quantity">−</button>
-          <span class="qty-value" id="qty-${item.name.replace(/\s+/g,'-')}">${item.qty}</span>
-          <button class="qty-btn" data-action="inc" data-name="${item.name}" aria-label="Increase quantity">+</button>
+          <button class="qty-btn" data-action="dec" data-name="${item.name}" aria-label="Decrease">−</button>
+          <span class="qty-value">${item.qty}</span>
+          <button class="qty-btn" data-action="inc" data-name="${item.name}" aria-label="Increase">+</button>
           <button class="remove-btn" data-name="${item.name}">Remove</button>
         </div>
       `;
       listEl.appendChild(el);
     });
 
-    // Quantity & remove buttons
     listEl.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const name  = btn.dataset.name;
-        const delta = btn.dataset.action === 'inc' ? 1 : -1;
-        updateQty(name, delta);
+        updateQty(btn.dataset.name, btn.dataset.action === 'inc' ? 1 : -1);
         renderCartPage();
       });
     });
@@ -115,7 +147,7 @@ const Cart = (() => {
       btn.addEventListener('click', () => { remove(btn.dataset.name); renderCartPage(); });
     });
 
-    // Summary rows
+    // Summary
     summaryEl.innerHTML = '';
     items.forEach(item => {
       const row = document.createElement('div');
@@ -125,12 +157,46 @@ const Cart = (() => {
     });
     totalEl.textContent = '$' + total().toFixed(2);
 
+    // Payment toggle wiring
+    const toggleOnline = document.getElementById('toggle-online');
+    const toggleCash   = document.getElementById('toggle-cash');
+    const onlineArea   = document.getElementById('online-payment-area');
+    const cashNotice   = document.getElementById('cash-notice');
+
+    let stripeLoaded = false;
+
+    function showOnline() {
+      toggleOnline.classList.add('active');
+      toggleCash.classList.remove('active');
+      onlineArea.classList.remove('hidden');
+      cashNotice.classList.add('hidden');
+      if (!stripeLoaded) {
+        stripeLoaded = true;
+        initStripe(total());
+      }
+    }
+
+    function showCash() {
+      toggleCash.classList.add('active');
+      toggleOnline.classList.remove('active');
+      cashNotice.classList.remove('hidden');
+      onlineArea.classList.add('hidden');
+    }
+
+    if (toggleOnline) toggleOnline.addEventListener('click', showOnline);
+    if (toggleCash)   toggleCash.addEventListener('click', showCash);
+
+    // Default: online (load Stripe immediately)
+    showOnline();
+
     // Place order
     if (placeBtn) {
-      placeBtn.addEventListener('click', () => {
-        const name  = document.getElementById('checkout-name')?.value.trim();
-        const phone = document.getElementById('checkout-phone')?.value.trim();
+      placeBtn.addEventListener('click', async () => {
+        const name    = document.getElementById('checkout-name')?.value.trim();
+        const phone   = document.getElementById('checkout-phone')?.value.trim();
+        const notes   = document.getElementById('order-notes')?.value || '';
         const errorEl = document.getElementById('cart-error');
+        const isOnline = toggleOnline?.classList.contains('active');
 
         if (!name) {
           errorEl.textContent = 'Please enter your name.';
@@ -138,32 +204,41 @@ const Cart = (() => {
           return;
         }
         errorEl.classList.add('hidden');
-
-        const isOnline = document.getElementById('toggle-online')?.classList.contains('active');
-        const notes    = document.getElementById('order-notes')?.value || '';
+        placeBtn.disabled = true;
+        placeBtn.textContent = 'Processing…';
 
         if (isOnline) {
-          // TODO: Trigger payment processor here
-          errorEl.textContent = 'Online payment coming soon — please select Cash at Pickup.';
-          errorEl.classList.remove('hidden');
-          return;
+          // ── Stripe confirm ───────────────────────────────
+          const { error } = await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+              return_url: window.location.origin + '/confirmation.html',
+              payment_method_data: { billing_details: { name } },
+            },
+            redirect: 'if_required',
+          });
+
+          if (error) {
+            errorEl.textContent = error.message;
+            errorEl.classList.remove('hidden');
+            placeBtn.disabled = false;
+            placeBtn.textContent = 'Place Order';
+            return;
+          }
         }
 
-        // Cash order — save to sessionStorage and redirect
-        const orderData = {
-          items: getItems(),
-          total: total().toFixed(2),
+        // Save order & redirect
+        sessionStorage.setItem('vg_last_order', JSON.stringify({
+          items: getItems(), total: total().toFixed(2),
           name, phone, notes,
           paymentMethod: isOnline ? 'online' : 'cash',
-        };
-        sessionStorage.setItem('vg_last_order', JSON.stringify(orderData));
+        }));
         clear();
         window.location.href = 'confirmation.html';
       });
     }
   }
 
-  // Init on load
   document.addEventListener('DOMContentLoaded', () => {
     updateNavCount();
     renderCartPage();
@@ -171,3 +246,24 @@ const Cart = (() => {
 
   return { add, remove, updateQty, clear, total, count, getItems };
 })();
+
+// ── Stripe appearance (matches brand) ──────────────────────
+function stripeAppearance() {
+  return {
+    theme: 'stripe',
+    variables: {
+      colorPrimary:       '#C8212A',
+      colorBackground:    '#FAFAFA',
+      colorText:          '#0A0A0A',
+      colorDanger:        '#C8212A',
+      fontFamily:         '"DM Sans", system-ui, sans-serif',
+      spacingUnit:        '4px',
+      borderRadius:       '0px',
+    },
+    rules: {
+      '.Input': { border: '1px solid #E2E2E2', boxShadow: 'none' },
+      '.Input:focus': { border: '1px solid #0A0A0A', boxShadow: 'none' },
+      '.Label': { fontFamily: '"Courier Prime", monospace', fontSize: '11px', letterSpacing: '0.12em', textTransform: 'uppercase', color: '#5A5A5A' },
+    },
+  };
+}
