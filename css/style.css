@@ -199,7 +199,7 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   align-items: center;
   justify-content: center;
   text-align: center;
-  padding: 4rem 1.5rem;
+  padding: 2rem 1.5rem;
 }
 .hero__logo { width: 200px; height: auto; margin-bottom: 2.5rem; }
 .hero__concept {
