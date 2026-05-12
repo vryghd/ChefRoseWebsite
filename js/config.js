@@ -30,6 +30,12 @@ const CONFIG = {
   // ── Catering Deposit ───────────────────────────────────────
   DEPOSIT_AMOUNT: 250,
 
+  // ── Extras Pricing ─────────────────────────────────────────
+  // Price per additional side beyond what's included
+  EXTRA_SIDE_PRICE: 3.00,
+  // Price to add an extra portion of protein
+  EXTRA_MEAT_PRICE: 8.00,
+
   // ── Gallery Photos ──────────────────────────────────────────
   // Add filenames here as you drop images into assets/photos/
   // Example: 'jerk-chicken.jpg', 'oxtail-bowl.jpg'

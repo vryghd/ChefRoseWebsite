@@ -64,13 +64,49 @@
     </section>
   </main>
 
-  <!-- SIDES PICKER MODAL -->
-  <div class="sides-modal" id="sides-modal" role="dialog" aria-label="Choose your sides">
+  <!-- CUSTOMIZER MODAL -->
+  <div class="sides-modal" id="sides-modal" role="dialog" aria-label="Customize your order">
     <div class="sides-modal__box">
+
+      <!-- Header -->
       <p class="sides-modal__label">Entrée</p>
       <h2 class="sides-modal__title" id="sides-modal-title"></h2>
       <p class="sides-modal__sub" id="sides-modal-sub">Choose your sides</p>
-      <div class="sides-modal__list" id="sides-list"></div>
+
+      <!-- Required sides -->
+      <div class="sides-section">
+        <div class="sides-section__hdr">
+          <span class="sides-section__title">Included Sides</span>
+          <span class="sides-req-count" id="req-count">0 / 2 selected</span>
+        </div>
+        <div class="sides-modal__list" id="sides-list"></div>
+      </div>
+
+      <!-- Extra sides -->
+      <div class="sides-section sides-section--extra">
+        <div class="sides-section__hdr">
+          <span class="sides-section__title">Extra Sides</span>
+          <span class="sides-extra-cost" id="extra-sides-cost"></span>
+        </div>
+        <p class="sides-section__note">+$<span id="extra-side-price-label"></span> per additional side</p>
+        <div class="sides-modal__list" id="extra-sides-list"></div>
+      </div>
+
+      <!-- Extra meat -->
+      <div class="sides-section">
+        <label class="extra-meat-row" id="extra-meat-row">
+          <input type="checkbox" id="extra-meat-check" />
+          <span class="side-check-icon"></span>
+          <span class="extra-meat-label" id="extra-meat-label">Extra Protein  +$8.00</span>
+        </label>
+      </div>
+
+      <!-- Notes -->
+      <div class="sides-section">
+        <p class="sides-section__title" style="margin-bottom:0.6rem;">Special Instructions</p>
+        <textarea class="form-input form-textarea" id="sides-notes" placeholder="No onions, extra sauce, allergy notes…" style="min-height:70px;font-size:0.85rem;"></textarea>
+      </div>
+
       <p class="sides-modal__error hidden" id="sides-error"></p>
       <button class="btn btn-red btn-full" id="sides-confirm">Add to Order</button>
       <button class="sides-modal__cancel" id="sides-cancel">Cancel</button>

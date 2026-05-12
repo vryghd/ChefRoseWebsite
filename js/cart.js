@@ -131,13 +131,16 @@ const Cart = (() => {
     items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'cart-item';
-      const sidesHTML = item.sides && item.sides.length
-        ? `<p class="cart-item__sides">${item.sides.join(', ')}</p>`
-        : '';
+
+      const sidesHTML      = item.sides      && item.sides.length      ? `<p class="cart-item__sides">${item.sides.join(', ')}</p>` : '';
+      const extraSidesHTML = item.extraSides && item.extraSides.length ? `<p class="cart-item__sides cart-item__sides--extra">+ Extra: ${item.extraSides.join(', ')}</p>` : '';
+      const extraMeatHTML  = item.extraMeat  ? `<p class="cart-item__badge">+ Extra Protein</p>` : '';
+      const notesHTML      = item.notes      ? `<p class="cart-item__notes">"${item.notes}"</p>` : '';
+
       el.innerHTML = `
         <div class="cart-item__info">
           <p class="cart-item__name">${item.name}</p>
-          ${sidesHTML}
+          ${sidesHTML}${extraSidesHTML}${extraMeatHTML}${notesHTML}
           <p class="cart-item__unit">$${item.price.toFixed(2)} each</p>
         </div>
         <div class="cart-item__controls">
