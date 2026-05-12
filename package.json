@@ -1,0 +1,24 @@
+{
+  "name": "chef-rose-website",
+  "version": "1.0.0",
+  "description": "Website for Very Ghood catering and everyday menu ordering. Hosted on GitHub Pages. Menu managed via Google Sheets.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vryghd/ChefRoseWebsite.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/vryghd/ChefRoseWebsite/issues"
+  },
+  "homepage": "https://github.com/vryghd/ChefRoseWebsite#readme",
+  "dependencies": {
+    "stripe": "^22.1.1"
+  }
+}
