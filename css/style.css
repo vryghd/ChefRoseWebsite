@@ -308,6 +308,14 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   color: var(--gray-600);
   line-height: 1.5;
 }
+.menu-item__sides-note {
+  font-family: var(--font-primary);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-top: 0.4rem;
+}
 
 .menu-item__right {
   display: flex;
@@ -378,6 +386,12 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   font-family: var(--font-primary);
   font-size: 0.95rem;
   font-weight: 700;
+  margin-bottom: 0.2rem;
+}
+.cart-item__sides {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--gray-600);
   margin-bottom: 0.2rem;
 }
 .cart-item__unit {
@@ -702,6 +716,142 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   font-family: var(--font-primary);
   font-weight: 700;
   color: var(--black);
+}
+
+/* ============================================
+   SIDES PICKER MODAL
+   ============================================ */
+.sides-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 10, 0.6);
+  z-index: 150;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+.sides-modal.open { display: flex; }
+
+.sides-modal__box {
+  background: var(--white);
+  border: 1px solid var(--gray-200);
+  padding: 2rem;
+  width: 100%;
+  max-width: 480px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.sides-modal__label {
+  font-family: var(--font-primary);
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--red);
+  margin-bottom: 0.4rem;
+}
+.sides-modal__title {
+  font-family: var(--font-secondary);
+  font-size: 1.6rem;
+  font-weight: 300;
+  font-style: italic;
+  margin-bottom: 0.25rem;
+}
+.sides-modal__sub {
+  font-family: var(--font-primary);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-600);
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.sides-modal__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 1.5rem;
+}
+
+/* Custom checkbox row */
+.side-option {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.side-option:last-child { border-bottom: none; }
+.side-option input[type="checkbox"] { display: none; }
+
+.side-check-icon {
+  width: 18px; height: 18px;
+  border: 1.5px solid var(--gray-200);
+  flex-shrink: 0;
+  transition: all 0.15s;
+  position: relative;
+}
+.side-option input:checked ~ .side-check-icon {
+  background: var(--black);
+  border-color: var(--black);
+}
+.side-option input:checked ~ .side-check-icon::after {
+  content: '';
+  position: absolute;
+  left: 4px; top: 1px;
+  width: 5px; height: 9px;
+  border: 1.5px solid var(--white);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
+}
+.side-option input:disabled ~ .side-check-icon {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.side-option input:disabled ~ .side-name { opacity: 0.35; }
+
+.side-name {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+}
+
+.sides-modal__error {
+  font-family: var(--font-primary);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--red);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+.sides-modal__cancel {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.75rem;
+  font-family: var(--font-primary);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gray-400);
+  cursor: pointer;
+  transition: color 0.2s;
+  padding: 0.5rem 0;
+}
+.sides-modal__cancel:hover { color: var(--red); }
+
+.sides-unavailable {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  color: var(--gray-400);
+  padding: 1rem 0;
+  font-style: italic;
 }
 
 /* ============================================

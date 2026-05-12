@@ -18,22 +18,31 @@ const Cart = (() => {
 
   function add(item) {
     const items = getItems();
-    const existing = items.find(i => i.name === item.name);
+    // Use name + sorted sides as unique key so same entrée with diff sides coexist
+    const sidesKey = (item.sides || []).slice().sort().join('|');
+    const key = item.name + (sidesKey ? '::' + sidesKey : '');
+    const existing = items.find(i => i._key === key);
     if (existing) {
       existing.qty += 1;
     } else {
-      items.push({ name: item.name, price: item.price, image: item.image || '', qty: 1 });
+      items.push({
+        _key:  key,
+        name:  item.name,
+        price: item.price,
+        sides: item.sides || [],
+        qty:   1,
+      });
     }
     saveItems(items);
   }
 
-  function remove(name) {
-    saveItems(getItems().filter(i => i.name !== name));
+  function remove(key) {
+    saveItems(getItems().filter(i => i._key !== key));
   }
 
-  function updateQty(name, delta) {
+  function updateQty(key, delta) {
     const items = getItems().map(i => {
-      if (i.name === name) i.qty = Math.max(1, i.qty + delta);
+      if (i._key === key) i.qty = Math.max(1, i.qty + delta);
       return i;
     });
     saveItems(items);
@@ -122,16 +131,20 @@ const Cart = (() => {
     items.forEach(item => {
       const el = document.createElement('div');
       el.className = 'cart-item';
+      const sidesHTML = item.sides && item.sides.length
+        ? `<p class="cart-item__sides">${item.sides.join(', ')}</p>`
+        : '';
       el.innerHTML = `
         <div class="cart-item__info">
           <p class="cart-item__name">${item.name}</p>
+          ${sidesHTML}
           <p class="cart-item__unit">$${item.price.toFixed(2)} each</p>
         </div>
         <div class="cart-item__controls">
-          <button class="qty-btn" data-action="dec" data-name="${item.name}" aria-label="Decrease">−</button>
+          <button class="qty-btn" data-action="dec" data-key="${item._key}" aria-label="Decrease">−</button>
           <span class="qty-value">${item.qty}</span>
-          <button class="qty-btn" data-action="inc" data-name="${item.name}" aria-label="Increase">+</button>
-          <button class="remove-btn" data-name="${item.name}">Remove</button>
+          <button class="qty-btn" data-action="inc" data-key="${item._key}" aria-label="Increase">+</button>
+          <button class="remove-btn" data-key="${item._key}">Remove</button>
         </div>
       `;
       listEl.appendChild(el);
@@ -139,12 +152,12 @@ const Cart = (() => {
 
     listEl.querySelectorAll('.qty-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        updateQty(btn.dataset.name, btn.dataset.action === 'inc' ? 1 : -1);
+        updateQty(btn.dataset.key, btn.dataset.action === 'inc' ? 1 : -1);
         renderCartPage();
       });
     });
     listEl.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.addEventListener('click', () => { remove(btn.dataset.name); renderCartPage(); });
+      btn.addEventListener('click', () => { remove(btn.dataset.key); renderCartPage(); });
     });
 
     // Summary

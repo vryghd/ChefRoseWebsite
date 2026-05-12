@@ -9,23 +9,60 @@ Hosted on GitHub Pages. Menu managed via Google Sheets.
 
 ### Step 1 — Create the Sheet
 
-1. Go to [sheets.google.com](https://sheets.google.com) on your phone or computer
+1. Go to [sheets.google.com](https://sheets.google.com)
 2. Create a new spreadsheet — name it **Very Ghood Menu**
-3. Set up **Row 1** as headers exactly like this:
+3. You need **two tabs** inside the same spreadsheet
+
+---
+
+#### Tab 1 — Rename it "Menu"
+
+Set up Row 1 as headers exactly:
 
 | A | B | C | D | E | F |
 |---|---|---|---|---|---|
-| category | name | description | price | available | image |
+| category | name | description | price | type | sides |
 
-4. Add your menu items starting on Row 2. Example:
+- `category` — how items group on the site (e.g. Entrée, À la Carte)
+- `type` — either **entrée** or **standalone**
+  - `entrée` → customer sees a sides picker before adding to cart
+  - `standalone` → adds to cart directly (pasta, soups, etc.)
+- `sides` — how many sides the customer must choose (e.g. `2` or `3`) — leave blank for standalone
 
-| category | name | description | price | available | image |
-|----------|------|-------------|-------|-----------|-------|
-| Entrees | Jerk Chicken Bowl | Slow-cooked w/ rice & peas | 18.00 | TRUE | |
-| Sides | Mac & Cheese | Creamy, baked | 6.00 | TRUE | |
+Example rows:
 
-- Set `available` to **FALSE** to hide an item without deleting it
-- Leave `image` blank for now — add a URL when you have photos
+| category | name | description | price | type | sides |
+|----------|------|-------------|-------|------|-------|
+| Entrée | Lamb Chops | Pan-seared lamb | 38.00 | entrée | 2 |
+| Entrée | Lobster Tail | Butter-poached | 55.00 | entrée | 3 |
+| À la Carte | Pasta | Rigatoni in vodka cream sauce | 18.00 | standalone | |
+
+---
+
+#### Tab 2 — Rename it "Sides"
+
+Set up Row 1 as headers:
+
+| A | B |
+|---|---|
+| name | available |
+
+- Set `available` to **TRUE** to show the side, **FALSE** to hide it that day
+
+Example:
+
+| name | available |
+|------|-----------|
+| Garlic Mashed Potatoes | TRUE |
+| Roasted Asparagus | TRUE |
+| Mac & Cheese | TRUE |
+| Rice & Peas | FALSE |
+| Roasted Carrots | TRUE |
+| Sautéed Spinach | TRUE |
+
+**To change sides that day**: just flip TRUE ↔ FALSE in the Sides tab from your phone.
+
+---
 
 ### Step 2 — Publish via Apps Script
 
@@ -34,40 +71,54 @@ Hosted on GitHub Pages. Menu managed via Google Sheets.
 
 ```javascript
 function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const rows  = sheet.getDataRange().getValues();
-  const headers = rows[0];
-  const data = rows.slice(1).map(row => {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+
+  // ── Menu tab ─────────────────────────────────────────────
+  const menuSheet = ss.getSheetByName('Menu');
+  const menuRows  = menuSheet.getDataRange().getValues();
+  const menuHdrs  = menuRows[0];
+  const menu = menuRows.slice(1).map(row => {
     const obj = {};
-    headers.forEach((h, i) => obj[h] = row[i]);
+    menuHdrs.forEach((h, i) => obj[h] = row[i]);
     return obj;
   });
+
+  // ── Sides tab ─────────────────────────────────────────────
+  const sidesSheet = ss.getSheetByName('Sides');
+  const sidesRows  = sidesSheet.getDataRange().getValues();
+  const sidesHdrs  = sidesRows[0];
+  const sides = sidesRows.slice(1).map(row => {
+    const obj = {};
+    sidesHdrs.forEach((h, i) => obj[h] = row[i]);
+    return obj;
+  });
+
   return ContentService
-    .createTextOutput(JSON.stringify(data))
+    .createTextOutput(JSON.stringify({ menu, sides }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 ```
 
-3. Click **Save** (name the project anything, e.g. "VeryGhood")
+3. Click **Save** — name the project anything (e.g. "VeryGhood")
 4. Click **Deploy → New Deployment**
-5. Click the gear icon next to "Select type" → choose **Web App**
-6. Set **Execute as:** Me
-7. Set **Who has access:** Anyone
-8. Click **Deploy** — copy the URL it gives you
+5. Gear icon next to "Select type" → **Web App**
+6. **Execute as:** Me — **Who has access:** Anyone
+7. Click **Deploy** — copy the URL
 
-### Step 3 — Add URL to Site
+### Step 3 — Paste URL into Site
 
-1. Open `js/config.js` in this project
-2. Replace `YOUR_GOOGLE_SHEETS_JSON_URL_HERE` with the URL you copied
-3. Save and push to GitHub
+Open `js/config.js` and replace `YOUR_GOOGLE_SHEETS_JSON_URL_HERE` with your URL. Commit and push.
 
 ---
 
 ## Updating the Menu From Your Phone
 
-1. Open **Google Sheets** app → open "Very Ghood Menu"
-2. Edit any row (change price, toggle available to FALSE, add new item)
-3. The site updates automatically within a few minutes — no coding needed
+- **Change a side dish**: open Sides tab, flip TRUE/FALSE
+- **Change what the pasta is today**: edit the description cell in the Menu tab
+- **Add a new item**: add a row in the Menu tab
+- **Hide an item**: delete the row or change the price to 0
+
+Changes are live within a few minutes — no code needed.
 
 ---
 

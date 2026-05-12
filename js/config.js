@@ -37,8 +37,20 @@ const CONFIG = {
     // 'filename.jpg',
   ],
 
-  // ── Sample menu data (used when Sheets URL is not set) ─────
+  // ── Sample data (used when Sheets URL is not set) ───────────────
+  // type: 'entrée'  → shows sides picker, 'sides' column = how many they choose
+  // type: 'standalone' → adds to cart directly, no sides picker
   SAMPLE_MENU: [
-    { category: 'Entrees', name: 'Item Coming Soon', description: 'Menu managed via Google Sheets', price: 0.00 }
-  ]
+    { category: 'Entrée',      name: 'Protein of the Day', description: 'Ask your server',    price: 0.00, type: 'entrée',     sides: 2 },
+    { category: 'À la Carte',  name: 'Pasta of the Day',   description: 'Ask your server',    price: 0.00, type: 'standalone', sides: 0 },
+  ],
+
+  SAMPLE_SIDES: [
+    'Garlic Mashed Potatoes',
+    'Roasted Asparagus',
+    'Mac & Cheese',
+    'Rice & Peas',
+    'Roasted Carrots',
+    'Sautéed Spinach',
+  ],
 };
