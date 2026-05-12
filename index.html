@@ -27,7 +27,7 @@
         <a href="cart.html" class="cart-btn" id="nav-cart-btn">
           Cart <span class="cart-count" id="nav-cart-count"></span>
         </a>
-        <button class="hamburger" id="hamburger" aria-label="Menu">
+        <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -84,6 +84,7 @@
     hamburger.addEventListener('click', () => {
       hamburger.classList.toggle('open');
       mobileNav.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', hamburger.classList.contains('open'));
     });
     mobileNav.querySelectorAll('a').forEach(a => {
       a.addEventListener('click', () => {

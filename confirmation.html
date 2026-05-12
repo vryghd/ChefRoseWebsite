@@ -81,6 +81,9 @@
     const summaryEl = document.getElementById('conf-summary');
     const noteEl    = document.getElementById('conf-payment-note');
 
+    // Ensure cart is cleared (in case Stripe redirected)
+    localStorage.removeItem('vg_cart');
+
     if (order.items && order.items.length) {
       order.items.forEach(item => {
         const row = document.createElement('div');

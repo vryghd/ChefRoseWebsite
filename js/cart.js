@@ -22,7 +22,8 @@ const Cart = (() => {
     const sidesKey    = (item.sides      || []).slice().sort().join('|');
     const extSidesKey = (item.extraSides || []).slice().sort().join('|');
     const meatKey     = item.extraMeat ? '1' : '0';
-    const key         = [item.name, sidesKey, extSidesKey, meatKey, item.notes || ''].join('::');
+    const safeNotes   = btoa(encodeURIComponent(item.notes || ''));
+    const key         = [item.name, sidesKey, extSidesKey, meatKey, safeNotes].join('::');
 
     const existing = items.find(i => i._key === key);
     if (existing) {
@@ -79,10 +80,17 @@ const Cart = (() => {
   let stripe        = null;
   let elements      = null;
   let paymentElement = null;
+  let stripeLoaded  = false;
 
   async function initStripe(amount) {
     const onlineArea = document.getElementById('online-payment-area');
     if (!onlineArea) return;
+
+    if (elements && paymentElement) {
+      paymentElement.destroy();
+      elements = null;
+      paymentElement = null;
+    }
 
     onlineArea.innerHTML = '<div class="loading-state" style="padding:1rem 0;">Loading payment form…</div>';
 
@@ -109,6 +117,16 @@ const Cart = (() => {
       onlineArea.innerHTML = `<div class="payment-placeholder">Payment form unavailable. Please use Cash at Pickup or contact us directly.</div>`;
       console.error('Stripe init error:', err);
     }
+  }
+
+  let stripeTimer = null;
+  function queueStripeSync() {
+    const toggleOnline = document.getElementById('toggle-online');
+    if (!stripeLoaded || !toggleOnline?.classList.contains('active')) return;
+    if (stripeTimer) clearTimeout(stripeTimer);
+    stripeTimer = setTimeout(() => {
+      if (total() > 0) initStripe(total());
+    }, 500);
   }
 
   // ── Cart page rendering ─────────────────────────────────
@@ -163,10 +181,15 @@ const Cart = (() => {
       btn.addEventListener('click', () => {
         updateQty(btn.dataset.key, btn.dataset.action === 'inc' ? 1 : -1);
         renderCartPage();
+        queueStripeSync();
       });
     });
     listEl.querySelectorAll('.remove-btn').forEach(btn => {
-      btn.addEventListener('click', () => { remove(btn.dataset.key); renderCartPage(); });
+      btn.addEventListener('click', () => { 
+        remove(btn.dataset.key); 
+        renderCartPage(); 
+        queueStripeSync();
+      });
     });
 
     // Summary
@@ -184,8 +207,6 @@ const Cart = (() => {
     const toggleCash   = document.getElementById('toggle-cash');
     const onlineArea   = document.getElementById('online-payment-area');
     const cashNotice   = document.getElementById('cash-notice');
-
-    let stripeLoaded = false;
 
     function showOnline() {
       toggleOnline.classList.add('active');
@@ -229,6 +250,13 @@ const Cart = (() => {
         placeBtn.disabled = true;
         placeBtn.textContent = 'Processing…';
 
+        // Save order & redirect config BEFORE calling Stripe
+        sessionStorage.setItem('vg_last_order', JSON.stringify({
+          items: getItems(), total: total().toFixed(2),
+          name, phone, notes,
+          paymentMethod: isOnline ? 'online' : 'cash',
+        }));
+
         if (isOnline) {
           // ── Stripe confirm ───────────────────────────────
           const { error } = await stripe.confirmPayment({
@@ -245,16 +273,11 @@ const Cart = (() => {
             errorEl.classList.remove('hidden');
             placeBtn.disabled = false;
             placeBtn.textContent = 'Place Order';
+            sessionStorage.removeItem('vg_last_order');
             return;
           }
         }
 
-        // Save order & redirect
-        sessionStorage.setItem('vg_last_order', JSON.stringify({
-          items: getItems(), total: total().toFixed(2),
-          name, phone, notes,
-          paymentMethod: isOnline ? 'online' : 'cash',
-        }));
         clear();
         window.location.href = 'confirmation.html';
       });

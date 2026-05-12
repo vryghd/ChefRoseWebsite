@@ -32,7 +32,7 @@
         description: r.description || r.Description || '',
         price:       parseFloat(r.price || r.Price  || 0),
         type:        (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
-        sides:       parseInt(r.sides || r.Sides || 2, 10),
+        sides:       (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 2),
       }));
 
       const sides = (json.sides || [])
@@ -131,7 +131,7 @@
     const reqCountEl = document.getElementById('req-count');
     if (!modal) return;
 
-    const required        = item.sides || 2;
+    const required        = item.sides !== undefined ? item.sides : 2;
     const extraSidePrice  = CONFIG.EXTRA_SIDE_PRICE || 3;
     const extraMeatPrice  = CONFIG.EXTRA_MEAT_PRICE || 8;
 
@@ -225,6 +225,23 @@
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
 
+    // Trap Focus
+    const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+    const firstFocusable = focusableElements[0];
+    const lastFocusable = focusableElements[focusableElements.length - 1];
+    
+    function trapFocus(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) {
+          if (document.activeElement === firstFocusable) { e.preventDefault(); lastFocusable.focus(); }
+        } else {
+          if (document.activeElement === lastFocusable) { e.preventDefault(); firstFocusable.focus(); }
+        }
+      }
+    }
+    modal.addEventListener('keydown', trapFocus);
+    if (firstFocusable) firstFocusable.focus();
+
     // ── Confirm ───────────────────────────────────────────
     function handleConfirm() {
       const total = reqTotal();
@@ -268,6 +285,8 @@
       confirmBtn.removeEventListener('click', handleConfirm);
       cancelBtn.removeEventListener('click', closeModal);
       closeXBtn.removeEventListener('click', closeModal);
+      modal.removeEventListener('keydown', trapFocus);
+      if (addBtn) addBtn.focus();
     }
 
     confirmBtn.addEventListener('click', handleConfirm);
