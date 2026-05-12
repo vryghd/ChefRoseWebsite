@@ -118,6 +118,7 @@
   // ── Customizer modal ──────────────────────────────────────
   function openCustomizer(item, addBtn) {
     const modal      = document.getElementById('sides-modal');
+    const closeXBtn  = document.getElementById('sides-modal-close');
     const titleEl    = document.getElementById('sides-modal-title');
     const subEl      = document.getElementById('sides-modal-sub');
     const reqListEl  = document.getElementById('sides-list');
@@ -271,6 +272,7 @@
 
     confirmBtn.addEventListener('click', handleConfirm);
     cancelBtn.addEventListener('click', closeModal);
+    closeXBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { once: true });
   }
 

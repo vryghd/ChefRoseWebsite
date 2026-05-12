@@ -776,7 +776,28 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  position: relative;
 }
+
+/* × close button — top-right of any modal box */
+.modal-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--gray-200);
+  color: var(--gray-400);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+  z-index: 1;
+}
+.modal-close-btn:hover { border-color: var(--red); color: var(--red); }
 
 .sides-modal__label {
   font-family: var(--font-primary);
