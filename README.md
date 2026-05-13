@@ -1,7 +1,7 @@
 # Very Ghood — Dinner with Chef Rose
 
 Website for Very Ghood catering and everyday menu ordering.
-Hosted on GitHub Pages. Menu managed via Google Sheets.
+Hosted on **Cloudflare Pages**. Menu managed via Google Sheets.
 
 ---
 
@@ -107,7 +107,7 @@ function doGet() {
 
 ### Step 3 — Paste URL into Site
 
-Open `js/config.js` and replace `YOUR_GOOGLE_SHEETS_JSON_URL_HERE` with your URL. Commit and push.
+Open `public/js/config.js` and replace `YOUR_GOOGLE_SHEETS_JSON_URL_HERE` with your new Google Apps Script Web App URL. Save the file, commit, and push.
 
 ---
 
@@ -122,43 +122,54 @@ Changes are live within a few minutes — no code needed.
 
 ---
 
-## GitHub Pages Setup
+## Cloudflare Pages Setup
 
 1. Push this repo to GitHub
-2. Go to your repo → **Settings → Pages**
-3. Set source to **Deploy from a branch → master → / (root)**
-4. Your site will be live at `https://yourusername.github.io/very-ghood/`
+2. Log into Cloudflare Dashboard → **Workers & Pages** → **Create application** → **Pages** → **Connect to Git**
+3. Select this repository.
+4. In the Build settings:
+   - **Framework preset**: None
+   - **Build command**: (leave blank)
+   - **Build output directory**: `public`
+5. Click **Save and Deploy**. Your site will be live and your `functions/api/create-payment-intent.js` serverless function will automatically be configured!
 
 ---
 
-## Payment Processor (Add When Ready)
+## Payment Processor Setup (Stripe)
 
-Open `js/config.js` and uncomment + fill in either:
-- **Stripe**: Add your `STRIPE_PUBLIC_KEY`
-- **Square**: Add your `SQUARE_APP_ID` and `SQUARE_LOCATION_ID`
+Stripe is fully integrated using Cloudflare Pages serverless functions.
+To ensure payments work in production:
 
-Then update `js/cart.js` (online payment section) and `js/catering.js` (deposit section) — both files have clear `TODO` comments marking exactly where to plug in.
+1. Open `public/js/config.js` and ensure `CONFIG.STRIPE_PUBLIC_KEY` is set to your **Live Public Key** (`pk_live_...`).
+2. Go to your Cloudflare Dashboard → Pages → Your Project → **Settings** → **Environment variables**.
+3. Add a new variable: `STRIPE_SECRET_KEY` and paste your **Live Secret Key** (`sk_live_...`).
+4. Go to **Settings** → **Functions** → **Compatibility flags** and ensure `nodejs_compat` is added to production.
+5. Deploy a new build to apply the keys.
 
 ---
 
 ## File Structure
 
-```
+```text
 /
-├── index.html          ← Home
-├── menu.html           ← Everyday menu
-├── catering.html       ← Catering booking
-├── cart.html           ← Cart & checkout
-├── confirmation.html   ← Order confirmed
-├── contact.html        ← Contact
-├── css/
-│   └── style.css       ← All styles
-├── js/
-│   ├── config.js       ← Sheets URL, payment keys, business info
-│   ├── menu.js         ← Menu rendering
-│   ├── cart.js         ← Cart logic
-│   └── catering.js     ← Catering form
-└── assets/
-    ├── logo.png        ← Chef Rose logo
-    └── photos/         ← Food photos (add when ready)
+├── functions/
+│   └── api/
+│       └── create-payment-intent.js  ← Stripe serverless function (Cloudflare)
+├── public/
+│   ├── index.html                    ← Home
+│   ├── menu.html                     ← Everyday menu
+│   ├── catering.html                 ← Catering booking
+│   ├── cart.html                     ← Cart & checkout
+│   ├── confirmation.html             ← Order confirmed
+│   ├── contact.html                  ← Contact
+│   ├── css/
+│   │   └── style.css                 ← All styles
+│   ├── js/
+│   │   ├── config.js                 ← Sheets URL, Stripe public key, business info
+│   │   ├── menu.js                   ← Menu rendering logic
+│   │   ├── cart.js                   ← LocalStorage cart logic + Stripe Checkout
+│   │   └── catering.js               ← Catering form + $250 Deposit Checkout
+│   └── assets/
+│       ├── logo.png                  ← Chef Rose logo
+│       └── photos/                   ← Food photos for gallery
 ```
