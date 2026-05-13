@@ -44,9 +44,9 @@ const CONFIG = {
   // type: 'entrée'  → shows sides picker, 'sides' column = how many they choose
   // type: 'standalone' → adds to cart directly, no sides picker
   SAMPLE_MENU: [
-    { category: 'Entrée',     name: 'Lamb Chops',   description: 'Connect your Google Sheet to display live menu items and pricing.', price: 0.00, type: 'entrée',     sides: 2 },
-    { category: 'Entrée',     name: 'Lobster Tail',  description: 'Connect your Google Sheet to display live menu items and pricing.', price: 0.00, type: 'entrée',     sides: 2 },
-    { category: 'À la Carte', name: 'Pasta',         description: 'Connect your Google Sheet to display live menu items and pricing.', price: 0.00, type: 'standalone', sides: 0 },
+    { category: 'Entrée',     name: 'Lamb Chops',   description: 'Connect your Google Sheet to display live menu items and pricing.', price: 25.00, type: 'entrée',     sides: 2 },
+    { category: 'Entrée',     name: 'Lobster Tail',  description: 'Connect your Google Sheet to display live menu items and pricing.', price: 35.00, type: 'entrée',     sides: 2 },
+    { category: 'À la Carte', name: 'Pasta',         description: 'Connect your Google Sheet to display live menu items and pricing.', price: 15.00, type: 'standalone', sides: 0 },
   ],
 
   SAMPLE_SIDES: [
