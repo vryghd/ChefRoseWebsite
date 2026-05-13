@@ -108,7 +108,14 @@ const Cart = (() => {
       if (error) throw new Error(error);
 
       elements = stripe.elements({ clientSecret, appearance: stripeAppearance() });
-      paymentElement = elements.create('payment');
+      paymentElement = elements.create('payment', {
+        layout: {
+          type: 'accordion',
+          defaultCollapsed: false,
+          radios: true,
+          spacedAccordionItems: false
+        }
+      });
 
       onlineArea.innerHTML = '<div id="stripe-payment-element"></div>';
       paymentElement.mount('#stripe-payment-element');
