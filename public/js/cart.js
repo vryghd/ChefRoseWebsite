@@ -163,14 +163,19 @@ const Cart = (() => {
       const el = document.createElement('div');
       el.className = 'cart-item';
 
-      const sidesHTML      = item.sides      && item.sides.length      ? `<p class="cart-item__sides">${item.sides.join(', ')}</p>` : '';
-      const extraSidesHTML = item.extraSides && item.extraSides.length ? `<p class="cart-item__sides cart-item__sides--extra">+ Extra: ${item.extraSides.join(', ')}</p>` : '';
-      const extraMeatHTML  = item.extraMeat  ? `<p class="cart-item__badge">+ Extra Protein</p>` : '';
-      const notesHTML      = item.notes      ? `<p class="cart-item__notes">"${item.notes}"</p>` : '';
+      const safeName       = typeof escapeHTML === 'function' ? escapeHTML(item.name) : item.name;
+      const safeSides      = typeof escapeHTML === 'function' && item.sides ? item.sides.map(escapeHTML) : (item.sides || []);
+      const safeExtSides   = typeof escapeHTML === 'function' && item.extraSides ? item.extraSides.map(escapeHTML) : (item.extraSides || []);
+      const safeNotes      = typeof escapeHTML === 'function' ? escapeHTML(item.notes) : item.notes;
+
+      const sidesHTML      = safeSides.length      ? `<p class="cart-item__sides">${safeSides.join(', ')}</p>` : '';
+      const extraSidesHTML = safeExtSides.length   ? `<p class="cart-item__sides cart-item__sides--extra">+ Extra: ${safeExtSides.join(', ')}</p>` : '';
+      const extraMeatHTML  = item.extraMeat        ? `<p class="cart-item__badge">+ Extra Protein</p>` : '';
+      const notesHTML      = safeNotes             ? `<p class="cart-item__notes">"${safeNotes}"</p>` : '';
 
       el.innerHTML = `
         <div class="cart-item__info">
-          <p class="cart-item__name">${item.name}</p>
+          <p class="cart-item__name">${safeName}</p>
           ${sidesHTML}${extraSidesHTML}${extraMeatHTML}${notesHTML}
           <p class="cart-item__unit">$${item.price.toFixed(2)} each</p>
         </div>
@@ -204,7 +209,8 @@ const Cart = (() => {
     items.forEach(item => {
       const row = document.createElement('div');
       row.className = 'summary-row';
-      row.innerHTML = `<span>${item.name} ×${item.qty}</span><span>$${(item.price * item.qty).toFixed(2)}</span>`;
+      const safeName = typeof escapeHTML === 'function' ? escapeHTML(item.name) : item.name;
+      row.innerHTML = `<span>${safeName} ×${item.qty}</span><span>$${(item.price * item.qty).toFixed(2)}</span>`;
       summaryEl.appendChild(row);
     });
     totalEl.textContent = '$' + total().toFixed(2);

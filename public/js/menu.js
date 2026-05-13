@@ -84,10 +84,13 @@
       el.className = 'menu-item';
       el.setAttribute('role', 'listitem');
 
+      const safeName = typeof escapeHTML === 'function' ? escapeHTML(item.name) : item.name;
+      const safeDesc = typeof escapeHTML === 'function' && item.description ? escapeHTML(item.description) : item.description;
+
       el.innerHTML = `
         <div class="menu-item__info">
-          <p class="menu-item__name">${item.name}</p>
-          ${item.description ? `<p class="menu-item__desc">${item.description}</p>` : ''}
+          <p class="menu-item__name">${safeName}</p>
+          ${safeDesc ? `<p class="menu-item__desc">${safeDesc}</p>` : ''}
           ${isEntree ? `<p class="menu-item__sides-note">Choose ${item.sides} side${item.sides !== 1 ? 's' : ''}</p>` : ''}
         </div>
         <div class="menu-item__right">
@@ -171,10 +174,11 @@
     }
 
     function buildStepperRow(side, map, onChange) {
+      const safeSide = typeof escapeHTML === 'function' ? escapeHTML(side) : side;
       const row = document.createElement('div');
       row.className = 'side-stepper-row';
       row.innerHTML = `
-        <span class="side-stepper-name">${side}</span>
+        <span class="side-stepper-name">${safeSide}</span>
         <div class="side-stepper">
           <button class="stepper-btn dec" type="button" aria-label="Decrease">−</button>
           <span class="stepper-val">${map[side]}</span>

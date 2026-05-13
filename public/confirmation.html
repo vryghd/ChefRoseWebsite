@@ -93,7 +93,8 @@
       order.items.forEach(item => {
         const row = document.createElement('div');
         row.className = 'conf-row';
-        row.innerHTML = `<span>${item.name} x${item.qty}</span><span>$${(item.price * item.qty).toFixed(2)}</span>`;
+        const safeName = typeof escapeHTML === 'function' ? escapeHTML(item.name) : item.name;
+        row.innerHTML = `<span>${safeName} x${item.qty}</span><span>$${(item.price * item.qty).toFixed(2)}</span>`;
         summaryEl.appendChild(row);
       });
       const totalRow = document.createElement('div');
