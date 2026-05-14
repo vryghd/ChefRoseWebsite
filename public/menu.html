@@ -115,6 +115,59 @@
     </div>
   </div>
 
+  <!-- PROTEIN SELECTION MODAL -->
+  <div class="sides-modal" id="protein-modal" role="dialog" aria-modal="true" aria-label="Choose your protein">
+    <div class="sides-modal__box">
+      <button class="modal-close-btn" id="protein-modal-close" aria-label="Close">&#times;</button>
+
+      <p class="sides-modal__label">Customize</p>
+      <h2 class="sides-modal__title">Rasta Pasta</h2>
+      <p class="sides-modal__sub">Choose your protein</p>
+
+      <div class="sides-section">
+        <div class="protein-options">
+
+          <label class="protein-option">
+            <input type="radio" name="protein" value="Chicken" checked />
+            <span class="protein-option__box">
+              <span class="protein-option__check"></span>
+            </span>
+            <span class="protein-option__info">
+              <span class="protein-option__name">Chicken</span>
+              <span class="protein-option__price">Included</span>
+            </span>
+          </label>
+
+          <label class="protein-option">
+            <input type="radio" name="protein" value="Shrimp" />
+            <span class="protein-option__box">
+              <span class="protein-option__check"></span>
+            </span>
+            <span class="protein-option__info">
+              <span class="protein-option__name">Shrimp</span>
+              <span class="protein-option__price">Included</span>
+            </span>
+          </label>
+
+          <label class="protein-option">
+            <input type="radio" name="protein" value="Both" />
+            <span class="protein-option__box">
+              <span class="protein-option__check"></span>
+            </span>
+            <span class="protein-option__info">
+              <span class="protein-option__name">Chicken &amp; Shrimp</span>
+              <span class="protein-option__price protein-option__price--upcharge">+$10.00</span>
+            </span>
+          </label>
+
+        </div>
+      </div>
+
+      <button class="btn btn-red btn-full" id="protein-confirm">Add to Order</button>
+      <button class="sides-modal__cancel" id="protein-cancel">Cancel</button>
+    </div>
+  </div>
+
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer__inner">

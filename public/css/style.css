@@ -1223,6 +1223,81 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
 .footer__links a:hover { color: var(--red); }
 
 /* ============================================
+   PROTEIN SELECTION MODAL
+   ============================================ */
+.protein-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.protein-option {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.9rem 0;
+  border-bottom: 1px solid var(--gray-100);
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.protein-option:last-child { border-bottom: none; }
+.protein-option:hover { background: var(--gray-100); margin: 0 -2rem; padding-left: 2rem; padding-right: 2rem; }
+
+/* Hide native radio */
+.protein-option input[type="radio"] { display: none; }
+
+/* Custom radio box */
+.protein-option__box {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--gray-200);
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative;
+}
+.protein-option__check {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+  transition: background 0.15s;
+}
+.protein-option input:checked ~ .protein-option__box {
+  border-color: var(--red);
+  background: var(--white);
+}
+.protein-option input:checked ~ .protein-option__box .protein-option__check {
+  background: var(--red);
+}
+
+/* Label text */
+.protein-option__info {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: center;
+}
+.protein-option__name {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+}
+.protein-option__price {
+  font-family: var(--font-primary);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--gray-400);
+  text-transform: uppercase;
+}
+.protein-option__price--upcharge {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* ============================================
    UTILITIES
    ============================================ */
 .text-muted { color: var(--gray-600); }
