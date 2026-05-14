@@ -69,10 +69,10 @@
 
             <!-- Deposit Notice -->
             <div class="deposit-notice">
-              <p class="deposit-notice__title">$250 Deposit Required</p>
+              <p class="deposit-notice__title">$250 Deposit Required to Book</p>
               <p class="deposit-notice__text">
-                A $250 deposit is required at the time of booking to hold your date.
-                This amount is applied directly to your total catering balance.
+                A $250 deposit holds your date and is applied directly to your catering total.
+                Not ready to commit? Book a <strong>$10 consultation</strong> first — Chef Rose will walk you through options, pricing, and availability.
               </p>
             </div>
 
@@ -84,7 +84,25 @@
 
           <!-- RIGHT — Booking Form -->
           <div class="booking-form" id="booking-form-wrapper">
-            <h3 class="booking-form__title">Request a Booking</h3>
+
+            <!-- Service Toggle -->
+            <div class="payment-toggle" style="margin-bottom:1.5rem;">
+              <p class="payment-toggle__label">What are you booking?</p>
+              <div class="toggle-options">
+                <button class="toggle-option active" id="toggle-booking" type="button">Book an Event — $250</button>
+                <button class="toggle-option" id="toggle-consult" type="button">Consultation — $10</button>
+              </div>
+            </div>
+
+            <!-- Consultation note (hidden by default) -->
+            <div id="consult-note" class="deposit-notice hidden" style="margin-bottom:1.5rem;">
+              <p class="deposit-notice__title">What's a Consultation?</p>
+              <p class="deposit-notice__text">
+                A 30-minute call with Chef Rose to discuss your vision, menu options, guest count, and pricing. The $10 fee is credited toward your booking deposit if you move forward.
+              </p>
+            </div>
+
+            <h3 class="booking-form__title">Your Information</h3>
             <form id="catering-form" novalidate>
               <div class="form-row">
                 <div class="form-group">
@@ -104,40 +122,43 @@
                 <label class="form-label" for="phone">Phone</label>
                 <input class="form-input" type="tel" id="phone" name="phone" placeholder="(000) 000-0000" />
               </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label" for="event-date">Event Date</label>
-                  <input class="form-input" type="date" id="event-date" name="event_date" required />
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="guest-count">Guest Count</label>
-                  <input class="form-input" type="number" id="guest-count" name="guest_count" min="1" placeholder="e.g. 50" />
-                </div>
-              </div>
               <div class="form-group">
-                <label class="form-label" for="event-type">Event Type</label>
-                <select class="form-input form-select" id="event-type" name="event_type">
-                  <option value="">Select an event type</option>
-                  <option value="wedding">Wedding</option>
-                  <option value="birthday">Birthday / Celebration</option>
-                  <option value="corporate">Corporate Event</option>
-                  <option value="private-dinner">Private Dinner</option>
-                  <option value="popup">Pop-Up / Community Event</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="notes">Special Requests / Notes</label>
+                <label class="form-label" for="notes">Tell Us About Your Event</label>
                 <textarea class="form-input form-textarea" id="notes" name="notes" placeholder="Dietary restrictions, vibe, theme, anything we should know..."></textarea>
               </div>
 
-              <!-- Deposit Payment Placeholder -->
-              <div class="payment-placeholder" id="deposit-payment-area">
-                Payment processor coming soon.<br/>Your deposit of $250 will be charged here.
+              <!-- Booking-only fields (hidden in consultation mode) -->
+              <div id="booking-fields">
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="event-date">Event Date</label>
+                    <input class="form-input" type="date" id="event-date" name="event_date" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="guest-count">Guest Count</label>
+                    <input class="form-input" type="number" id="guest-count" name="guest_count" min="1" placeholder="e.g. 50" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="event-type">Event Type</label>
+                  <select class="form-input form-select" id="event-type" name="event_type">
+                    <option value="">Select an event type</option>
+                    <option value="wedding">Wedding</option>
+                    <option value="birthday">Birthday / Celebration</option>
+                    <option value="corporate">Corporate Event</option>
+                    <option value="private-dinner">Private Dinner</option>
+                    <option value="popup">Pop-Up / Community Event</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
 
-              <p id="catering-form-error" class="hidden" style="color:var(--red);font-family:var(--font-primary);font-size:0.78rem;margin-bottom:1rem;letter-spacing:0.05em;"></p>
-              <button type="submit" class="btn btn-red btn-full" id="catering-submit-btn">
+              <!-- Payment area -->
+              <p class="form-label" id="deposit-label" style="margin-bottom:0.75rem;">$250 deposit — applied to your total</p>
+              <div id="deposit-payment-area"></div>
+
+              <p id="catering-form-error" class="hidden" style="color:var(--red);font-family:var(--font-primary);font-size:0.78rem;margin:0.75rem 0;letter-spacing:0.05em;"></p>
+              <button type="submit" class="btn btn-red btn-full" id="catering-submit-btn" style="margin-top:1rem;">
                 Submit &amp; Pay $250 Deposit
               </button>
             </form>
@@ -145,9 +166,8 @@
             <!-- Success State -->
             <div id="catering-success" class="hidden" style="text-align:center;padding:2rem 0;">
               <p style="font-family:var(--font-secondary);font-size:1.75rem;font-style:italic;margin-bottom:1rem;">Request Received</p>
-              <p style="font-family:var(--font-body);font-size:0.9rem;color:var(--gray-600);line-height:1.7;">
-                Thank you — your $250 deposit has been submitted and your date is being held.
-                Chef Rose will be in touch within 24 hours to confirm details.
+              <p class="success-msg" style="font-family:var(--font-body);font-size:0.9rem;color:var(--gray-600);line-height:1.7;">
+                Thank you — your deposit has been submitted. Chef Rose will be in touch within 24 hours.
               </p>
             </div>
           </div>
