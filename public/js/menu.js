@@ -27,12 +27,13 @@
       const json = await res.json();
 
       const menu = (json.menu || []).map(r => ({
-        category:    r.category    || r.Category    || 'Other',
-        name:        r.name        || r.Name        || '',
-        description: r.description || r.Description || '',
-        price:       parseFloat(r.price || r.Price  || 0),
-        type:        (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
-        sides:       (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 2),
+        category:       r.category       || r.Category       || 'Other',
+        name:           r.name           || r.Name           || '',
+        description:    r.description    || r.Description    || '',
+        price:          parseFloat(r.price || r.Price        || 0),
+        type:           (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
+        sides:          (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 2),
+        protein_prompt: String(r.protein_prompt || r.Protein_prompt || '').toUpperCase() === 'TRUE',
       }));
 
       const sides = (json.sides || [])
@@ -100,7 +101,9 @@
       `;
 
       el.querySelector('.add-btn').addEventListener('click', function () {
-        if (isEntree) {
+        if (item.protein_prompt) {
+          openProteinModal(item, this);
+        } else if (isEntree) {
           openCustomizer(item, this);
         } else {
           Cart.add({ name: item.name, price: item.price });
@@ -297,6 +300,69 @@
     cancelBtn.addEventListener('click', closeModal);
     closeXBtn.addEventListener('click', closeModal);
     modal.addEventListener('click', e => { if (e.target === modal) closeModal(); }, { once: true });
+  }
+
+  // ── Protein Selection Modal ─────────────────────────────
+  function openProteinModal(item, addBtn) {
+    const modal      = document.getElementById('protein-modal');
+    const closeXBtn  = document.getElementById('protein-modal-close');
+    const confirmBtn = document.getElementById('protein-confirm');
+    const cancelBtn  = document.getElementById('protein-cancel');
+    if (!modal) return;
+
+    // Reset radio to default
+    const defaultRadio = modal.querySelector('input[name="protein"][value="Chicken"]');
+    if (defaultRadio) defaultRadio.checked = true;
+
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    // Focus trap
+    const focusable = modal.querySelectorAll('button, input');
+    const firstF = focusable[0];
+    const lastF  = focusable[focusable.length - 1];
+    function trapFocus(e) {
+      if (e.key === 'Tab') {
+        if (e.shiftKey) { if (document.activeElement === firstF) { e.preventDefault(); lastF.focus(); } }
+        else            { if (document.activeElement === lastF)  { e.preventDefault(); firstF.focus(); } }
+      }
+      if (e.key === 'Escape') closeProteinModal();
+    }
+    modal.addEventListener('keydown', trapFocus);
+    if (firstF) firstF.focus();
+
+    function handleConfirm() {
+      const selected = modal.querySelector('input[name="protein"]:checked');
+      if (!selected) return;
+      const choice = selected.value;
+
+      let customItem = {
+        name:  item.name + ' (' + choice + ')',
+        price: item.price + (choice === 'Both' ? 10 : 0),
+      };
+
+      Cart.add(customItem);
+      closeProteinModal();
+      flashAdded(addBtn);
+    }
+
+    function closeProteinModal() {
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+      confirmBtn.removeEventListener('click', handleConfirm);
+      cancelBtn.removeEventListener('click', closeProteinModal);
+      closeXBtn.removeEventListener('click', closeProteinModal);
+      modal.removeEventListener('keydown', trapFocus);
+      modal.removeEventListener('click', backdropClose);
+      if (addBtn) addBtn.focus();
+    }
+
+    function backdropClose(e) { if (e.target === modal) closeProteinModal(); }
+
+    confirmBtn.addEventListener('click', handleConfirm);
+    cancelBtn.addEventListener('click', closeProteinModal);
+    closeXBtn.addEventListener('click', closeProteinModal);
+    modal.addEventListener('click', backdropClose, { once: true });
   }
 
   // ── Init ─────────────────────────────────────────────────
