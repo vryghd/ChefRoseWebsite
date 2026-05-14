@@ -59,7 +59,7 @@ export async function onRequestPost(context) {
 
         if (customerEmail) {
           // Send the email using Resend
-          const downloadUrl = 'https://veryghood.com/assets/downloads/cookbook-v1.pdf';
+          const downloadUrl = 'https://veryghood.com/assets/downloads/cookbook-v1.zip';
           
           const emailHtml = `
             <div style="font-family: 'DM Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #0A0A0A;">
@@ -67,9 +67,9 @@ export async function onRequestPost(context) {
               <h2>Your Cookbook is Here!</h2>
               <p>Hi ${customerName},</p>
               <p>Thank you for purchasing the Very Ghood Cookbook (Version 1)! We appreciate your support.</p>
-              <p>You can securely download your digital copy using the link below:</p>
+              <p>You can securely download your digital copy (ZIP) using the link below:</p>
               <div style="margin: 30px 0;">
-                <a href="${downloadUrl}" style="background-color: #C8212A; color: #FAFAFA; padding: 12px 24px; text-decoration: none; font-weight: bold; display: inline-block;">Download Cookbook PDF</a>
+                <a href="${downloadUrl}" style="background-color: #C8212A; color: #FAFAFA; padding: 12px 24px; text-decoration: none; font-weight: bold; display: inline-block;">Download Cookbook ZIP</a>
               </div>
               <p style="font-style: italic; color: #5A5A5A;">Note: Version 2 is coming soon, keep an eye out for updates!</p>
               <p>Enjoy cooking,</p>
