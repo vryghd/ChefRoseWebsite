@@ -8,12 +8,12 @@ export async function onRequestPost(context) {
   const { request, env } = context;
 
   const STRIPE_SECRET = env.STRIPE_SECRET_KEY;
-  const WEBHOOK_SECRET = env.STRIPE_WEBHOOK_SECRET;
   
-  // Hardcoded Resend API Key provided by user
+  // Hardcoded secrets provided by user/screenshots to simplify setup
+  const WEBHOOK_SECRET = 'whsec_mgLrcCLAmJwugEgmOf0PpbIstXlNG60H';
   const RESEND_KEY = 're_d13JMtoz_xWaTWPQCifRkHETsmdbddLde';
 
-  if (!STRIPE_SECRET || !WEBHOOK_SECRET) {
+  if (!STRIPE_SECRET) {
     return new Response(JSON.stringify({ error: 'Missing environment variables' }), { status: 500 });
   }
 
