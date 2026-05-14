@@ -126,38 +126,6 @@ document.addEventListener('DOMContentLoaded', () => {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Processing…';
 
-    // Re-init with final form values before confirming
-    // (captures any info typed after the initial load)
-    const phone  = form.querySelector('#phone').value.trim();
-    const guests = form.querySelector('#guest-count')?.value || '';
-    const notes  = form.querySelector('#notes').value.trim();
-    const amount = currentMode === 'booking' ? CONFIG.DEPOSIT_AMOUNT : 10;
-
-    // Update PaymentIntent metadata before confirming
-    try {
-      const res2 = await fetch(CONFIG.PAYMENT_INTENT_URL, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          amount,
-          metadata: {
-            source:      currentMode === 'booking' ? 'catering-deposit' : 'catering-consultation',
-            customer:    `${firstName} ${lastName}`.trim(),
-            email, phone,
-            event_date:  eventDate,
-            event_type:  eventType,
-            guest_count: guests,
-            amount_paid: `$${amount}`,
-            ...(notes ? { notes: notes.slice(0, 499) } : {}),
-          },
-        }),
-      });
-      const { clientSecret: newSecret, error: piErr } = await res2.json();
-      if (!piErr && newSecret) {
-        elements.fetchUpdates();
-      }
-    } catch (_) { /* non-fatal — proceed with original intent */ }
-
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {

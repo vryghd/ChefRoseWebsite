@@ -14,7 +14,7 @@ const CONFIG = {
   // Paste your Stripe publishable key (starts with pk_live_ or pk_test_)
   STRIPE_PUBLIC_KEY: 'pk_live_51TW3ye3C5MtiZo8ZQjsNGoBHPSCGmzDOUVmaoQZTJqZJsQzAFZBYC2PpZa6cTCj1J0sxLa7cSlu5O5ineUQ7aEdJ00w80gT4sa',
 
-  // Serverless function endpoint (works on Netlify automatically)
+  // Serverless function endpoint (Cloudflare Pages Functions — /functions/api/)
   PAYMENT_INTENT_URL: '/api/create-payment-intent',
 
   // ── Business Info ──────────────────────────────────────────

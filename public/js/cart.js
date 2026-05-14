@@ -22,8 +22,10 @@ const Cart = (() => {
     const sidesKey    = (item.sides      || []).slice().sort().join('|');
     const extSidesKey = (item.extraSides || []).slice().sort().join('|');
     const meatKey     = item.extraMeat ? '1' : '0';
-    const safeNotes   = btoa(encodeURIComponent(item.notes || ''));
-    const key         = [item.name, sidesKey, extSidesKey, meatKey, safeNotes].join('::');
+    let safeNotes;
+    try { safeNotes = btoa(encodeURIComponent(item.notes || '')); }
+    catch { safeNotes = encodeURIComponent(item.notes || '').slice(0, 80); }
+    const key = [item.name, sidesKey, extSidesKey, meatKey, safeNotes].join('::');
 
     const existing = items.find(i => i._key === key);
     if (existing) {
@@ -265,8 +267,9 @@ const Cart = (() => {
     // Default: online (load Stripe immediately)
     showOnline();
 
-    // Place order
-    if (placeBtn) {
+    // Place order — guard prevents duplicate listeners across re-renders
+    if (placeBtn && !placeBtn.dataset.wired) {
+      placeBtn.dataset.wired = '1';
       placeBtn.addEventListener('click', async () => {
         const name    = document.getElementById('checkout-name')?.value.trim();
         const phone   = document.getElementById('checkout-phone')?.value.trim();
