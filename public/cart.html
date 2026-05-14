@@ -103,11 +103,9 @@
               <input class="form-input" type="tel" id="checkout-phone" placeholder="(816) 000-0000" />
             </div>
 
-            <!-- Online payment area -->
+            <!-- Online payment area (Stripe injects here) -->
             <div id="online-payment-area">
-              <div class="payment-placeholder">
-                Payment processor coming soon.<br />Card payment will be processed here.
-              </div>
+              <!-- Stripe Payment Element mounts here -->
             </div>
 
             <!-- Cash notice -->
@@ -161,6 +159,7 @@
   <script src="js/cart.js"></script>
   <script>
     document.getElementById('year').textContent = new Date().getFullYear();
+    // Hamburger only — payment toggle is wired in cart.js
     const hamburger = document.getElementById('hamburger');
     const mobileNav = document.getElementById('mobile-nav');
     hamburger.addEventListener('click', () => {
@@ -172,25 +171,6 @@
         hamburger.classList.remove('open');
         mobileNav.classList.remove('open');
       });
-    });
-
-    // Toggle payment method
-    const toggleOnline = document.getElementById('toggle-online');
-    const toggleCash   = document.getElementById('toggle-cash');
-    const onlineArea   = document.getElementById('online-payment-area');
-    const cashNotice   = document.getElementById('cash-notice');
-
-    toggleOnline.addEventListener('click', () => {
-      toggleOnline.classList.add('active');
-      toggleCash.classList.remove('active');
-      onlineArea.classList.remove('hidden');
-      cashNotice.classList.add('hidden');
-    });
-    toggleCash.addEventListener('click', () => {
-      toggleCash.classList.add('active');
-      toggleOnline.classList.remove('active');
-      cashNotice.classList.remove('hidden');
-      onlineArea.classList.add('hidden');
     });
   </script>
 </body>

@@ -26,19 +26,25 @@
       const res  = await fetch(url);
       const json = await res.json();
 
-      const menu = (json.menu || []).map(r => ({
-        category:       r.category       || r.Category       || 'Other',
-        name:           r.name           || r.Name           || '',
-        description:    r.description    || r.Description    || '',
-        price:          parseFloat(r.price || r.Price        || 0),
-        type:           (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
-        sides:          (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 2),
-        protein_prompt: String(r.protein_prompt || r.Protein_prompt || '').toUpperCase() === 'TRUE',
-      }));
+      const menu = (json.menu || [])
+        .map(r => ({
+          category:       r.category       || r.Category       || 'Other',
+          name:           r.name           || r.Name           || '',
+          description:    r.description    || r.Description    || '',
+          price:          parseFloat(r.price || r.Price        || 0),
+          type:           (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
+          sides:          (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 2),
+          protein_prompt: String(r.protein_prompt || r.Protein_prompt || '').toUpperCase() === 'TRUE',
+          // available col: blank/missing = shown; FALSE = hidden
+          available:      String(r.available || r.Available || 'true').toUpperCase() !== 'FALSE',
+        }))
+        // Drop rows with no name or marked unavailable
+        .filter(r => r.name && r.available);
 
       const sides = (json.sides || [])
-        .filter(s => String(s.available || s.Available).toUpperCase() !== 'FALSE')
-        .map(s => s.name || s.Name || '');
+        .filter(s => String(s.available || s.Available || 'true').toUpperCase() !== 'FALSE')
+        .map(s => s.name || s.Name || '')
+        .filter(Boolean);
 
       return { menu, sides };
     } catch (e) {

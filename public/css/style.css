@@ -544,6 +544,10 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
 .toggle-option.active { background: var(--black); color: var(--white); }
 .toggle-option:first-child { border-right: 1px solid var(--gray-200); }
 
+/* Stripe Payment Element wrapper */
+#stripe-payment-element { min-height: 200px; }
+#online-payment-area .loading-state { padding: 2rem 0; text-align: center; }
+
 /* Forms (shared) */
 .form-group { margin-bottom: 1rem; }
 .form-label {
@@ -1399,5 +1403,30 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   }
   .footer__links li {
     display: inline-flex;
+  }
+
+  /* --- PAYMENT / CHECKOUT (mobile) --- */
+  .payment-toggle { margin: 1.25rem 0; }
+
+  /* Taller tap targets for payment method toggle */
+  .toggle-options { width: 100%; }
+  .toggle-option {
+    padding: 1rem 0.5rem;
+    font-size: 0.7rem;
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Give Stripe iframe room to render all payment method tabs */
+  #online-payment-area { min-height: 200px; }
+  #stripe-payment-element { min-height: 200px; }
+
+  /* Checkout panel: flush edge-to-edge on mobile */
+  .checkout-panel {
+    padding: 1.5rem 1rem;
+    border-left: none;
+    border-right: none;
   }
 }

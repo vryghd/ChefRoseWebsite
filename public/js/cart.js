@@ -110,10 +110,7 @@ const Cart = (() => {
       elements = stripe.elements({ clientSecret, appearance: stripeAppearance() });
       paymentElement = elements.create('payment', {
         layout: {
-          type: 'accordion',
-          defaultCollapsed: false,
-          radios: true,
-          spacedAccordionItems: false
+          type: 'tabs',
         }
       });
 
@@ -215,7 +212,8 @@ const Cart = (() => {
     });
     totalEl.textContent = '$' + total().toFixed(2);
 
-    // Payment toggle wiring
+    // ── Payment toggle ───────────────────────────────────
+    // Wire only once — guard prevents duplicate listeners on re-render
     const toggleOnline = document.getElementById('toggle-online');
     const toggleCash   = document.getElementById('toggle-cash');
     const onlineArea   = document.getElementById('online-payment-area');
@@ -239,8 +237,14 @@ const Cart = (() => {
       onlineArea.classList.add('hidden');
     }
 
-    if (toggleOnline) toggleOnline.addEventListener('click', showOnline);
-    if (toggleCash)   toggleCash.addEventListener('click', showCash);
+    if (toggleOnline && !toggleOnline.dataset.wired) {
+      toggleOnline.dataset.wired = '1';
+      toggleOnline.addEventListener('click', showOnline);
+    }
+    if (toggleCash && !toggleCash.dataset.wired) {
+      toggleCash.dataset.wired = '1';
+      toggleCash.addEventListener('click', showCash);
+    }
 
     // Default: online (load Stripe immediately)
     showOnline();
