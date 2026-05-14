@@ -825,6 +825,7 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   text-transform: uppercase;
   color: var(--red);
   margin-bottom: 0.4rem;
+  padding-right: 2.5rem; /* clear the × close button */
 }
 .sides-modal__title {
   font-family: var(--font-secondary);
@@ -832,6 +833,7 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   font-weight: 300;
   font-style: italic;
   margin-bottom: 0.25rem;
+  padding-right: 2.5rem; /* clear the × close button */
 }
 .sides-modal__sub {
   font-family: var(--font-primary);
