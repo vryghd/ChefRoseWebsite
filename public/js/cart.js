@@ -82,7 +82,7 @@ const Cart = (() => {
   let paymentElement = null;
   let stripeLoaded  = false;
 
-  async function initStripe(amount) {
+  async function initStripe(amount, orderMeta = {}) {
     const onlineArea = document.getElementById('online-payment-area');
     if (!onlineArea) return;
 
@@ -94,14 +94,29 @@ const Cart = (() => {
 
     onlineArea.innerHTML = '<div class="loading-state" style="padding:1rem 0;">Loading payment form…</div>';
 
+    // Build itemized metadata for Stripe dashboard
+    const cartItems  = getItems();
+    const lineItems  = cartItems.map(i =>
+      `${i.qty}x ${i.name} @ $${i.price.toFixed(2)}`
+    ).join(' | ');
+
+    const metadata = {
+      source:       'menu-order',
+      customer:     orderMeta.name  || '',
+      phone:        orderMeta.phone || '',
+      order_total:  '$' + total().toFixed(2),
+      item_count:   String(count()),
+      items:        lineItems.slice(0, 499), // Stripe metadata max 500 chars
+      ...orderMeta.notes ? { notes: orderMeta.notes.slice(0, 499) } : {},
+    };
+
     try {
       stripe = Stripe(CONFIG.STRIPE_PUBLIC_KEY);
 
-      // Create PaymentIntent via serverless function
       const res = await fetch(CONFIG.PAYMENT_INTENT_URL, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ amount, metadata: { source: 'menu-order' } }),
+        body:    JSON.stringify({ amount, metadata }),
       });
       const { clientSecret, error } = await res.json();
 
@@ -109,9 +124,7 @@ const Cart = (() => {
 
       elements = stripe.elements({ clientSecret, appearance: stripeAppearance() });
       paymentElement = elements.create('payment', {
-        layout: {
-          type: 'tabs',
-        }
+        layout: { type: 'tabs' }
       });
 
       onlineArea.innerHTML = '<div id="stripe-payment-element"></div>';
@@ -124,12 +137,12 @@ const Cart = (() => {
   }
 
   let stripeTimer = null;
-  function queueStripeSync() {
+  function queueStripeSync(orderMeta = {}) {
     const toggleOnline = document.getElementById('toggle-online');
     if (!stripeLoaded || !toggleOnline?.classList.contains('active')) return;
     if (stripeTimer) clearTimeout(stripeTimer);
     stripeTimer = setTimeout(() => {
-      if (total() > 0) initStripe(total());
+      if (total() > 0) initStripe(total(), orderMeta);
     }, 500);
   }
 
@@ -226,7 +239,10 @@ const Cart = (() => {
       cashNotice.classList.add('hidden');
       if (!stripeLoaded) {
         stripeLoaded = true;
-        initStripe(total());
+        // Pass whatever name/phone are already typed
+        const name  = document.getElementById('checkout-name')?.value.trim()  || '';
+        const phone = document.getElementById('checkout-phone')?.value.trim() || '';
+        initStripe(total(), { name, phone });
       }
     }
 
@@ -267,7 +283,8 @@ const Cart = (() => {
         placeBtn.disabled = true;
         placeBtn.textContent = 'Processing…';
 
-        // Save order & redirect config BEFORE calling Stripe
+        // Save order & metadata BEFORE calling Stripe
+        const orderMeta = { name, phone, notes };
         sessionStorage.setItem('vg_last_order', JSON.stringify({
           items: getItems(), total: total().toFixed(2),
           name, phone, notes,
@@ -275,6 +292,9 @@ const Cart = (() => {
         }));
 
         if (isOnline) {
+          // Re-init Stripe with full metadata (name/phone now confirmed)
+          await initStripe(total(), orderMeta);
+
           // ── Stripe confirm ───────────────────────────────
           const { error } = await stripe.confirmPayment({
             elements,
