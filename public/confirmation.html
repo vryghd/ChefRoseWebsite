@@ -18,7 +18,9 @@
         <span class="nav__brand">Very Ghood</span>
       </a>
       <ul class="nav__links">
-        <li><a href="menu.html">Menu</a></li>
+        <li><a href="menu.html">Menu</a>
+    <a href="cookbook.html">Cookbook</a></li>
+        <li><a href="cookbook.html">Cookbook</a></li>
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="catering.html">Catering</a></li>
         <li><a href="contact.html">Contact</a></li>
@@ -38,6 +40,7 @@
 
   <div class="nav__mobile" id="mobile-nav">
     <a href="menu.html">Menu</a>
+    <a href="cookbook.html">Cookbook</a>
     <a href="gallery.html">Gallery</a>
     <a href="catering.html">Catering</a>
     <a href="contact.html">Contact</a>
@@ -66,7 +69,9 @@
     <div class="container footer__inner">
       <p class="footer__copy">&copy; <span id="year"></span> Very Ghood. All rights reserved.</p>
       <ul class="footer__links">
-        <li><a href="menu.html">Menu</a></li>
+        <li><a href="menu.html">Menu</a>
+    <a href="cookbook.html">Cookbook</a></li>
+        <li><a href="cookbook.html">Cookbook</a></li>
         <li><a href="gallery.html">Gallery</a></li>
         <li><a href="catering.html">Catering</a></li>
         <li><a href="contact.html">Contact</a></li>
@@ -89,7 +94,20 @@
     // Ensure cart is cleared (in case Stripe redirected)
     localStorage.removeItem('vg_cart');
 
-    if (order.items && order.items.length) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderType = urlParams.get('type');
+
+    if (orderType === 'cookbook') {
+      document.querySelector('h1').textContent = 'Cookbook Purchased';
+      document.querySelector('.confirmation-box > p').textContent = 'Thank you for your purchase.';
+      noteEl.textContent = 'A secure download link has been sent to your email address.';
+      summaryEl.style.display = 'none';
+    } else if (orderType === 'catering' || orderType === 'consult') {
+      document.querySelector('h1').textContent = 'Request Received';
+      document.querySelector('.confirmation-box > p').textContent = 'Your deposit has been submitted.';
+      noteEl.textContent = 'Chef Rose will be in touch within 24 hours.';
+      summaryEl.style.display = 'none';
+    } else if (order.items && order.items.length) {
       order.items.forEach(item => {
         const row = document.createElement('div');
         row.className = 'conf-row';
@@ -103,7 +121,7 @@
       summaryEl.appendChild(totalRow);
 
       if (order.paymentMethod === 'cash') {
-        noteEl.textContent = 'Payment is due in cash at pickup. We'll message you with the pickup address.';
+        noteEl.textContent = 'Payment is due in cash at pickup. We\'ll message you with the pickup address.';
       } else {
         noteEl.textContent = 'Payment has been processed. Check your email for a receipt.';
       }

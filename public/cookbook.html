@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Very Ghood Cookbook — Dinner with Chef Rose</title>
+  <meta name="description" content="Purchase the official Very Ghood Cookbook (Version 1) by Chef Rose. Digital download available immediately after purchase." />
+  <link rel="preconnect" href="https://js.stripe.com" crossorigin />
+  <link rel="preconnect" href="https://api.stripe.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="icon" href="assets/logo.png" />
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="container nav__inner">
+      <a href="index.html" class="nav__logo">
+        <img src="assets/logo.png" alt="Very Ghood" />
+        <span class="nav__brand">Very Ghood</span>
+      </a>
+      <ul class="nav__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="cookbook.html" class="active">Cookbook</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+      <div class="nav__right">
+        <a href="cart.html" class="cart-btn" id="nav-cart-btn">
+          <span class="cart-text">Cart</span>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span class="cart-count" id="nav-cart-count"></span>
+        </a>
+        <button class="hamburger" id="hamburger" aria-label="Menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="nav__mobile" id="mobile-nav">
+    <a href="menu.html">Menu</a>
+    <a href="cookbook.html">Cookbook</a>
+    <a href="gallery.html">Gallery</a>
+    <a href="catering.html">Catering</a>
+    <a href="contact.html">Contact</a>
+  </div>
+
+  <main>
+    <header class="page-header">
+      <p class="page-header__label">Digital Download</p>
+      <h1 class="page-header__title">Very Ghood Cookbook</h1>
+      <p class="page-header__desc" style="color: var(--red); font-weight: 500;">Version 1</p>
+    </header>
+
+    <section class="catering-section">
+      <div class="container">
+        <div class="catering-layout">
+
+          <!-- LEFT — Info -->
+          <div class="catering-info">
+            <h2 class="catering-info__heading">Bring Chef Rose's Signature Flavors Home.</h2>
+            <p class="catering-info__body">
+              Get exclusive access to the recipes that made Very Ghood a staple. This digital cookbook includes step-by-step instructions for Chef Rose's most sought-after dishes.
+            </p>
+            
+            <div class="deposit-notice" style="margin-top: 2rem;">
+              <p class="deposit-notice__title">Version 2 Coming Soon</p>
+              <p class="deposit-notice__text">
+                An expanded Version 2 is currently in the works! Secure Version 1 now and start cooking immediately.
+              </p>
+            </div>
+
+            <div class="catering-divider"></div>
+            
+            <p style="font-family: var(--font-primary); font-size: 0.8rem; letter-spacing: 0.1em; color: var(--gray-600); text-transform: uppercase;">
+              Delivery Details
+            </p>
+            <p style="font-family: var(--font-body); font-size: 0.95rem; line-height: 1.6; margin-top: 0.5rem;">
+              After payment, a secure link to download the PDF cookbook will be emailed to you instantly.
+            </p>
+          </div>
+
+          <!-- RIGHT — Purchase Form -->
+          <div class="booking-form" id="cookbook-form-wrapper">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.5rem; border-bottom: 1px solid var(--gray-200); padding-bottom: 1rem;">
+              <h3 class="booking-form__title" style="margin-bottom: 0;">Purchase Cookbook</h3>
+              <span style="font-family: var(--font-primary); font-size: 1.25rem; font-weight: 700;">$20.00</span>
+            </div>
+
+            <form id="cookbook-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="first-name">First Name</label>
+                  <input class="form-input" type="text" id="first-name" name="first_name" required placeholder="First" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="last-name">Last Name</label>
+                  <input class="form-input" type="text" id="last-name" name="last_name" required placeholder="Last" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="email">Delivery Email</label>
+                <input class="form-input" type="email" id="email" name="email" required placeholder="Where should we send it?" />
+              </div>
+
+              <!-- Payment area -->
+              <p class="form-label" style="margin-bottom:0.75rem; margin-top:1.5rem;">Payment Information</p>
+              <div id="cookbook-payment-area"></div>
+
+              <p id="cookbook-form-error" class="hidden" style="color:var(--red);font-family:var(--font-primary);font-size:0.78rem;margin:0.75rem 0;letter-spacing:0.05em;"></p>
+              <button type="submit" class="btn btn-red btn-full" id="cookbook-submit-btn" style="margin-top:1.5rem;">
+                Pay $20.00 &amp; Download
+              </button>
+            </form>
+
+            <!-- Success State (will likely redirect to confirmation instead, but kept for fallback) -->
+            <div id="cookbook-success" class="hidden" style="text-align:center;padding:2rem 0;">
+              <p style="font-family:var(--font-secondary);font-size:1.75rem;font-style:italic;margin-bottom:1rem;">Thank You!</p>
+              <p class="success-msg" style="font-family:var(--font-body);font-size:0.9rem;color:var(--gray-600);line-height:1.7;">
+                Your payment was successful. Please check your email for the download link.
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer__inner">
+      <p class="footer__copy">&copy; <span id="year"></span> Very Ghood. All rights reserved.</p>
+      <ul class="footer__links">
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="cookbook.html">Cookbook</a></li>
+        <li><a href="gallery.html">Gallery</a></li>
+        <li><a href="catering.html">Catering</a></li>
+        <li><a href="contact.html">Contact</a></li>
+
+        <li><a href="privacy.html">Privacy Policy</a></li>
+        <li><a href="terms.html">Terms &amp; Conditions</a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="js/cookbook.js"></script>
+  <script src="js/cart.js"></script> <!-- for nav cart count -->
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobile-nav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+      hamburger.setAttribute('aria-expanded', hamburger.classList.contains('open'));
+    });
+    mobileNav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+      });
+    });
+  </script>
+</body>
+</html>
