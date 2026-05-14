@@ -65,6 +65,13 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   align-items: center;
   height: 100%;
 }
+/* On mobile the logo needs explicit left-alignment */
+@media (max-width: 768px) {
+  .nav__inner {
+    grid-template-columns: auto 1fr;
+  }
+  .nav__links { display: none !important; }
+}
 .nav__logo { display: flex; align-items: center; gap: 0.75rem; }
 .nav__logo img { height: 44px; width: auto; }
 .nav__brand {
@@ -671,10 +678,11 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   margin-bottom: 0.75rem;
 }
 .contact-block__value {
-  font-family: var(--font-secondary);
-  font-size: 1.4rem;
-  font-weight: 300;
-  font-style: italic;
+  font-family: var(--font-body);
+  font-size: 1.15rem;
+  font-weight: 500;
+  font-style: normal;
+  letter-spacing: 0.01em;
 }
 .contact-block__value a:hover { color: var(--red); }
 .contact-block__sub {
@@ -1199,7 +1207,8 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
 }
 .footer__links {
   display: flex;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
   list-style: none;
 }
 .footer__links a {
@@ -1209,6 +1218,7 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   text-transform: uppercase;
   color: var(--gray-400);
   transition: color 0.2s;
+  white-space: nowrap;
 }
 .footer__links a:hover { color: var(--red); }
 
@@ -1222,21 +1232,43 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
    RESPONSIVE — 768px
    ============================================ */
 @media (max-width: 768px) {
-  .nav__links { display: none; }
+  /* --- NAV --- */
+  .nav__inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+  }
+  .nav__links { display: none !important; }
   .cart-text { display: none; }
   .hamburger { display: flex; }
 
-  .page-header { padding: 3rem 1.25rem 2rem; }
-  .menu-section, .cart-section, .catering-section, .contact-section, .gallery-section, .legal-section { padding: 2rem 0 4rem; }
-  
-  /* Swipeable Mobile Gallery */
-  .gallery-grid { 
+  /* Ensure logo is left-aligned, actions right */
+  .nav__logo { flex: 0 0 auto; }
+  .nav__right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex: 0 0 auto;
+  }
+
+  /* Larger tap targets */
+  .cart-btn { padding: 0.5rem; min-width: 44px; min-height: 44px; display: flex; align-items: center; }
+  .hamburger { min-width: 44px; min-height: 44px; }
+
+  /* --- PAGE SECTIONS --- */
+  .page-header { padding: 2.5rem 1.25rem 1.75rem; }
+  .menu-section, .cart-section, .catering-section,
+  .contact-section, .gallery-section, .legal-section { padding: 1.5rem 0 3.5rem; }
+
+  /* --- GALLERY --- */
+  .gallery-grid {
     display: flex;
     flex-wrap: nowrap;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
     gap: 1rem;
-    padding-bottom: 1rem;
+    padding: 0 1rem 1rem;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -1248,23 +1280,49 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
     aspect-ratio: 4 / 5;
   }
 
-  .hero__logo { width: 220px; }
+  /* --- HERO --- */
+  .hero__logo { width: 200px; }
   .hero__ctas { flex-direction: column; align-items: center; }
-  .hero__ctas .btn { width: 100%; max-width: 280px; }
+  .hero__ctas .btn { width: 100%; max-width: 300px; padding: 1rem 2rem; }
 
+  /* --- LAYOUTS --- */
   .cart-layout,
   .catering-layout,
-  .contact-layout { grid-template-columns: 1fr; }
+  .contact-layout { grid-template-columns: 1fr; gap: 2rem; }
 
   .form-row { grid-template-columns: 1fr; }
-
   .checkout-panel { position: static; }
 
-  .menu-item {
-    grid-template-columns: 1fr auto;
-  }
+  /* --- MENU --- */
+  .menu-item { grid-template-columns: 1fr auto; }
   .menu-item__photo { display: none; }
 
-  .footer__inner { flex-direction: column; text-align: center; }
-  .footer__links { justify-content: center; }
+  /* --- CONTACT --- */
+  .contact-block__value {
+    font-size: 1.05rem;
+    word-break: break-word;
+  }
+  .contact-block__value a {
+    display: inline-block;
+    padding: 0.25rem 0;
+  }
+
+  /* --- FOOTER --- */
+  .footer {
+    padding: 2rem 0;
+  }
+  .footer__inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1.25rem;
+  }
+  .footer__links {
+    justify-content: center;
+    gap: 0.75rem 1.25rem;
+    max-width: 360px;
+  }
+  .footer__links li {
+    display: inline-flex;
+  }
 }
