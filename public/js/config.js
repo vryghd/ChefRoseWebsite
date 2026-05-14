@@ -8,7 +8,7 @@ const CONFIG = {
   // ── Google Sheets ──────────────────────────────────────────
   // After setting up your Google Sheet + Apps Script,
   // paste the published JSON URL here.
-  SHEETS_URL: 'https://script.google.com/macros/s/AKfycbwxw4OXiYpIP-y7iNc_0g_Q9VAwCNWd09RX8XgXE0GdyX_vE-IfoGHxzevxlIJTWQCl/exec',
+  SHEETS_URL: 'https://script.google.com/macros/s/AKfycbwei8QWqZr2YFJyvrHvtZhI8HF3Re3eBIV3NrcS2d_JMKd_-xExRF0zBaYgFunUuWQ5/exec',
 
   // ── Stripe ─────────────────────────────────────────────────
   // Paste your Stripe publishable key (starts with pk_live_ or pk_test_)
