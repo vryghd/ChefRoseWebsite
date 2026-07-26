@@ -29,7 +29,7 @@ const CONFIG = {
 
   // ── Extras Pricing ─────────────────────────────────────────
   // Price per additional side beyond what's included
-  EXTRA_SIDE_PRICE: 3.00,
+  EXTRA_SIDE_PRICE: 7.00,
   // Price to add an extra portion of protein
   EXTRA_MEAT_PRICE: 8.00,
 
@@ -44,8 +44,8 @@ const CONFIG = {
   // type: 'entrée'  → shows sides picker, 'sides' column = how many they choose
   // type: 'standalone' → adds to cart directly, no sides picker
   SAMPLE_MENU: [
-    { category: 'Entrée',     name: 'Lamb Chops',   description: 'Connect your Google Sheet to display live menu items and pricing.', price: 25.00, type: 'entrée',     sides: 2 },
-    { category: 'Entrée',     name: 'Lobster Tail',  description: 'Connect your Google Sheet to display live menu items and pricing.', price: 35.00, type: 'entrée',     sides: 2 },
+    { category: 'Entrée',     name: 'Lamb Chops',   description: 'Connect your Google Sheet to display live menu items and pricing.', price: 25.00, type: 'entrée',     sides: 3 },
+    { category: 'Entrée',     name: 'Lobster Tail',  description: 'Connect your Google Sheet to display live menu items and pricing.', price: 35.00, type: 'entrée',     sides: 3 },
     { category: 'À la Carte', name: 'Pasta',         description: 'Connect your Google Sheet to display live menu items and pricing.', price: 15.00, type: 'standalone', sides: 0 },
   ],
 
@@ -56,6 +56,12 @@ const CONFIG = {
     'Rice & Peas',
     'Roasted Carrots',
     'Sautéed Spinach',
+  ],
+
+  SAMPLE_SAUCES: [
+    { name: 'Peach Teriyaki', available: true },
+    { name: 'Sweet Chili',    available: true },
+    { name: 'Plain Cajun',     available: true },
   ],
 };
 

@@ -49,18 +49,23 @@ Set up Row 1 as headers:
 
 - Set `available` to **TRUE** to show the side, **FALSE** to hide it that day
 
-Example:
+---
+
+#### Tab 3 (Optional) — Rename it "Sauces" or "Flavors"
+
+Set up Row 1 as headers:
+
+| A | B |
+|---|---|
+| name | available |
+
+Example rows:
 
 | name | available |
 |------|-----------|
-| Garlic Mashed Potatoes | TRUE |
-| Roasted Asparagus | TRUE |
-| Mac & Cheese | TRUE |
-| Rice & Peas | FALSE |
-| Roasted Carrots | TRUE |
-| Sautéed Spinach | TRUE |
-
-**To change sides that day**: just flip TRUE ↔ FALSE in the Sides tab from your phone.
+| Peach Teriyaki | TRUE |
+| Sweet Chili | TRUE |
+| Plain Cajun | TRUE |
 
 ---
 
@@ -93,8 +98,21 @@ function doGet() {
     return obj;
   });
 
+  // ── Sauces tab ─────────────────────────────────────────────
+  const saucesSheet = ss.getSheetByName('Sauces') || ss.getSheetByName('Flavors');
+  let sauces = [];
+  if (saucesSheet) {
+    const saucesRows = saucesSheet.getDataRange().getValues();
+    const saucesHdrs = saucesRows[0];
+    sauces = saucesRows.slice(1).map(row => {
+      const obj = {};
+      saucesHdrs.forEach((h, i) => obj[h] = row[i]);
+      return obj;
+    });
+  }
+
   return ContentService
-    .createTextOutput(JSON.stringify({ menu, sides }))
+    .createTextOutput(JSON.stringify({ menu, sides, sauces }))
     .setMimeType(ContentService.MimeType.JSON);
 }
 ```

@@ -77,25 +77,22 @@
       <!-- Header -->
       <p class="sides-modal__label">Entrée</p>
       <h2 class="sides-modal__title" id="sides-modal-title"></h2>
-      <p class="sides-modal__sub" id="sides-modal-sub">Choose your sides</p>
-
-      <!-- Required sides -->
-      <div class="sides-section">
+      <!-- Wing Flavor (Hidden unless Wings item) -->
+      <div class="sides-section hidden" id="sauces-section">
         <div class="sides-section__hdr">
-          <span class="sides-section__title">Included Sides</span>
-          <span class="sides-req-count" id="req-count">0 / 2 selected</span>
+          <span class="sides-section__title">Wing Flavor <span class="req-star" style="color:var(--red);">*</span></span>
         </div>
-        <div class="sides-modal__list" id="sides-list"></div>
+        <div class="flavor-options" id="sauces-list"></div>
       </div>
 
-      <!-- Extra sides -->
-      <div class="sides-section sides-section--extra">
+      <!-- Sides (Single Unified List) -->
+      <div class="sides-section">
         <div class="sides-section__hdr">
-          <span class="sides-section__title">Extra Sides</span>
-          <span class="sides-extra-cost" id="extra-sides-cost"></span>
+          <span class="sides-section__title">Select Sides</span>
+          <span class="sides-req-count" id="req-count">0 / 3 selected</span>
         </div>
-        <p class="sides-section__note">+$<span id="extra-side-price-label"></span> per additional side</p>
-        <div class="sides-modal__list" id="extra-sides-list"></div>
+        <p class="sides-section__note">+$<span id="extra-side-price-label">7.00</span> per additional side beyond included</p>
+        <div class="sides-modal__list" id="sides-list"></div>
       </div>
 
       <!-- Extra meat -->

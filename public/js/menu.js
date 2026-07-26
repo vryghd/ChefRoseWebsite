@@ -1,11 +1,11 @@
 // ============================================================
 // VERY GHOOD — menu.js
-// Fetches menu + sides from Google Sheets
-// Entrée items open a customization modal:
-//   · Qty stepper per side (allows same side twice)
-//   · Extra sides at EXTRA_SIDE_PRICE each
-//   · Extra protein at EXTRA_MEAT_PRICE
-//   · Special instructions / notes
+// Fetches menu, sides & sauces from Google Sheets
+// Entrée items open customization modal:
+//   · Wing flavor selection (if Wings selected)
+//   · Unified sides list (3 included sides default)
+//   · Red highlight counter & dynamic add-on price for extra sides ($7 each)
+//   · Extra protein & special instructions
 // ============================================================
 
 (async function () {
@@ -13,31 +13,39 @@
   const itemsEl = document.getElementById('menu-items');
   if (!tabsEl || !itemsEl) return;
 
-  let menuData  = [];
-  let sidesPool = [];
+  let menuData   = [];
+  let sidesPool  = [];
+  let saucesPool = [];
 
   // ── Fetch ─────────────────────────────────────────────────
   async function fetchData() {
     const url = CONFIG.SHEETS_URL;
     if (!url || url === 'YOUR_GOOGLE_SHEETS_JSON_URL_HERE') {
-      return { menu: CONFIG.SAMPLE_MENU, sides: CONFIG.SAMPLE_SIDES };
+      const defaultSauces = (CONFIG.SAMPLE_SAUCES || []).filter(s => s.available).map(s => s.name);
+      return { menu: CONFIG.SAMPLE_MENU, sides: CONFIG.SAMPLE_SIDES, sauces: defaultSauces };
     }
     try {
-      const res  = await fetch(url);
+      // Timestamp cache-buster + no-store ensures live spreadsheet updates display instantly
+      const fetchUrl = url + (url.includes('?') ? '&' : '?') + 't=' + Date.now();
+      const res  = await fetch(fetchUrl, { cache: 'no-store' });
       const json = await res.json();
 
       const menu = (json.menu || [])
-        .map(r => ({
-          category:       r.category       || r.Category       || 'Other',
-          name:           r.name           || r.Name           || '',
-          description:    r.description    || r.Description    || '',
-          price:          parseFloat(r.price || r.Price        || 0),
-          type:           (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
-          sides:          (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 2),
-          protein_prompt: String(r.protein_prompt || r.Protein_prompt || '').toUpperCase() === 'TRUE',
-          // available col: blank/missing = shown; FALSE = hidden
-          available:      String(r.available || r.Available || 'true').toUpperCase() !== 'FALSE',
-        }))
+        .map(r => {
+          const rawName = r.name || r.Name || '';
+          return {
+            category:       r.category       || r.Category       || 'Other',
+            name:           rawName,
+            description:    r.description    || r.Description    || '',
+            price:          parseFloat(r.price || r.Price        || 0),
+            type:           (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
+            sides:          (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 3),
+            protein_prompt: String(r.protein_prompt || r.Protein_prompt || '').toUpperCase() === 'TRUE',
+            sauce_prompt:   String(r.sauce_prompt || r.Sauce_prompt || '').toUpperCase() === 'TRUE' || rawName.toLowerCase().includes('wing'),
+            // available col: blank/missing = shown; FALSE = hidden
+            available:      String(r.available || r.Available || 'true').toUpperCase() !== 'FALSE',
+          };
+        })
         // Drop rows with no name or marked unavailable
         .filter(r => r.name && r.available);
 
@@ -46,10 +54,22 @@
         .map(s => s.name || s.Name || '')
         .filter(Boolean);
 
-      return { menu, sides };
+      let sauces = (json.sauces || json.flavors || [])
+        .filter(s => String(s.available || s.Available || 'true').toUpperCase() !== 'FALSE')
+        .map(s => s.name || s.Name || '')
+        .filter(Boolean);
+
+      if (!sauces.length) {
+        sauces = (CONFIG.SAMPLE_SAUCES || [])
+          .filter(s => s.available)
+          .map(s => s.name);
+      }
+
+      return { menu, sides, sauces };
     } catch (e) {
       console.warn('Menu fetch failed, using sample data.', e);
-      return { menu: CONFIG.SAMPLE_MENU, sides: CONFIG.SAMPLE_SIDES };
+      const defaultSauces = (CONFIG.SAMPLE_SAUCES || []).filter(s => s.available).map(s => s.name);
+      return { menu: CONFIG.SAMPLE_MENU, sides: CONFIG.SAMPLE_SIDES, sauces: defaultSauces };
     }
   }
 
@@ -127,122 +147,140 @@
     setTimeout(() => { btn.textContent = '+ Add'; btn.classList.remove('added'); }, 1500);
   }
 
-  // ── Customizer modal ──────────────────────────────────────
+  // ── Customizer modal (Unified Sides & Wings Flavor) ───────
   function openCustomizer(item, addBtn) {
     const modal      = document.getElementById('sides-modal');
     const closeXBtn  = document.getElementById('sides-modal-close');
     const titleEl    = document.getElementById('sides-modal-title');
-    const subEl      = document.getElementById('sides-modal-sub');
-    const reqListEl  = document.getElementById('sides-list');
-    const extListEl  = document.getElementById('extra-sides-list');
+    const sidesListEl= document.getElementById('sides-list');
+    const saucesSecEl= document.getElementById('sauces-section');
+    const saucesLstEl= document.getElementById('sauces-list');
+    const meatCheckEl= document.getElementById('extra-meat-check');
     const meatLblEl  = document.getElementById('extra-meat-label');
     const notesEl    = document.getElementById('sides-notes');
     const errorEl    = document.getElementById('sides-error');
     const confirmBtn = document.getElementById('sides-confirm');
     const cancelBtn  = document.getElementById('sides-cancel');
     const reqCountEl = document.getElementById('req-count');
+    const priceLblEl = document.getElementById('extra-side-price-label');
     if (!modal) return;
 
-    const required        = item.sides !== undefined ? item.sides : 2;
-    const extraSidePrice  = CONFIG.EXTRA_SIDE_PRICE || 3;
-    const extraMeatPrice  = CONFIG.EXTRA_MEAT_PRICE || 8;
+    const required       = item.sides !== undefined ? item.sides : 3;
+    const extraSidePrice = CONFIG.EXTRA_SIDE_PRICE || 7.00;
+    const extraMeatPrice = CONFIG.EXTRA_MEAT_PRICE || 8.00;
+    const isWingsItem    = item.sauce_prompt || item.name.toLowerCase().includes('wing');
 
-    // State maps: sideName → qty
-    const reqMap  = {};
-    const extMap  = {};
-    sidesPool.forEach(s => { reqMap[s] = 0; extMap[s] = 0; });
+    // State map for sides: sideName → qty
+    const sideMap = {};
+    sidesPool.forEach(s => { sideMap[s] = 0; });
 
     titleEl.textContent = item.name;
-    subEl.textContent   = `Choose ${required} side${required !== 1 ? 's' : ''} — included`;
-    meatLblEl.textContent = `Extra Protein  +$${extraMeatPrice.toFixed(2)}`;
-    const priceLblEl = document.getElementById('extra-side-price-label');
     if (priceLblEl) priceLblEl.textContent = extraSidePrice.toFixed(2);
+    if (meatLblEl) meatLblEl.textContent = `Extra Protein  +$${extraMeatPrice.toFixed(2)}`;
+    if (meatCheckEl) meatCheckEl.checked = false;
     notesEl.value = '';
     errorEl.classList.add('hidden');
 
-    // ── Build required sides list ─────────────────────────
-    function buildRequiredList() {
-      reqListEl.innerHTML = '';
+    // ── Setup Wing Flavor Section ─────────────────────────
+    if (isWingsItem && saucesSecEl && saucesLstEl) {
+      saucesSecEl.classList.remove('hidden');
+      saucesLstEl.innerHTML = '';
+      if (!saucesPool.length) {
+        saucesLstEl.innerHTML = '<p class="sides-unavailable">Flavors unavailable.</p>';
+      } else {
+        saucesPool.forEach((sauce, idx) => {
+          const safeSauce = typeof escapeHTML === 'function' ? escapeHTML(sauce) : sauce;
+          const label = document.createElement('label');
+          label.className = 'flavor-option';
+          label.innerHTML = `
+            <input type="radio" name="wing-flavor" value="${safeSauce}" ${idx === 0 ? 'checked' : ''} />
+            <span class="flavor-option__box"><span class="flavor-option__check"></span></span>
+            <span class="flavor-option__name">${safeSauce}</span>
+          `;
+          saucesLstEl.appendChild(label);
+        });
+      }
+    } else if (saucesSecEl) {
+      saucesSecEl.classList.add('hidden');
+    }
+
+    // ── Build Single Unified Sides List ───────────────────
+    function buildSidesList() {
+      sidesListEl.innerHTML = '';
       if (!sidesPool.length) {
-        reqListEl.innerHTML = '<p class="sides-unavailable">Sides unavailable. Check back soon.</p>';
+        sidesListEl.innerHTML = '<p class="sides-unavailable">Sides unavailable. Check back soon.</p>';
         return;
       }
       sidesPool.forEach(side => {
-        const row = buildStepperRow(side, reqMap, () => updateReqUI());
-        reqListEl.appendChild(row);
+        const safeSide = typeof escapeHTML === 'function' ? escapeHTML(side) : side;
+        const row = document.createElement('div');
+        row.className = 'side-stepper-row';
+        row.innerHTML = `
+          <span class="side-stepper-name">${safeSide}</span>
+          <div class="side-stepper">
+            <button class="stepper-btn dec" type="button" aria-label="Decrease">−</button>
+            <span class="stepper-val">${sideMap[side]}</span>
+            <button class="stepper-btn inc" type="button" aria-label="Increase">+</button>
+          </div>
+        `;
+        row.querySelector('.dec').addEventListener('click', () => {
+          if (sideMap[side] > 0) {
+            sideMap[side]--;
+            row.querySelector('.stepper-val').textContent = sideMap[side];
+            updateUI();
+          }
+        });
+        row.querySelector('.inc').addEventListener('click', () => {
+          sideMap[side]++;
+          row.querySelector('.stepper-val').textContent = sideMap[side];
+          updateUI();
+        });
+        sidesListEl.appendChild(row);
       });
     }
 
-    // ── Build extra sides list ────────────────────────────
-    function buildExtraList() {
-      extListEl.innerHTML = '';
-      sidesPool.forEach(side => {
-        const row = buildStepperRow(side, extMap, () => updateExtUI());
-        extListEl.appendChild(row);
-      });
+    function totalSidesSelected() {
+      return sidesPool.reduce((sum, s) => sum + (sideMap[s] || 0), 0);
     }
 
-    function buildStepperRow(side, map, onChange) {
-      const safeSide = typeof escapeHTML === 'function' ? escapeHTML(side) : side;
-      const row = document.createElement('div');
-      row.className = 'side-stepper-row';
-      row.innerHTML = `
-        <span class="side-stepper-name">${safeSide}</span>
-        <div class="side-stepper">
-          <button class="stepper-btn dec" type="button" aria-label="Decrease">−</button>
-          <span class="stepper-val">${map[side]}</span>
-          <button class="stepper-btn inc" type="button" aria-label="Increase">+</button>
-        </div>
-      `;
-      row.querySelector('.dec').addEventListener('click', () => {
-        if (map[side] > 0) { map[side]--; row.querySelector('.stepper-val').textContent = map[side]; onChange(); }
-      });
-      row.querySelector('.inc').addEventListener('click', () => {
-        map[side]++;
-        row.querySelector('.stepper-val').textContent = map[side];
-        onChange();
-      });
-      return row;
-    }
+    // ── Dynamic Counter & Price Calculation ───────────────
+    function updateUI() {
+      const totalSelected  = totalSidesSelected();
+      const extraCount     = Math.max(0, totalSelected - required);
+      const extraSidesCost = extraCount * extraSidePrice;
+      const extraMeatCost  = (meatCheckEl && meatCheckEl.checked) ? extraMeatPrice : 0;
+      const currentPrice   = item.price + extraSidesCost + extraMeatCost;
 
-    // ── Required count display ────────────────────────────
-    function reqTotal() { return sidesPool.reduce((s, k) => s + (reqMap[k] || 0), 0); }
-    function extTotal() { return sidesPool.reduce((s, k) => s + (extMap[k] || 0), 0); }
-
-    function updateReqUI() {
-      const total = reqTotal();
-      reqCountEl.textContent = `${total} / ${required} selected`;
-      reqCountEl.classList.toggle('complete', total === required);
       errorEl.classList.add('hidden');
 
-      // Cap the + buttons in the required section at the required total
-      const atLimit = total >= required;
-      reqListEl.querySelectorAll('.stepper-btn.inc').forEach(btn => {
-        btn.disabled = atLimit;
-        btn.style.opacity = atLimit ? '0.3' : '';
-        btn.style.cursor  = atLimit ? 'not-allowed' : '';
-      });
+      if (totalSelected <= required) {
+        reqCountEl.textContent = `${totalSelected} / ${required} selected`;
+        reqCountEl.classList.remove('extra-active');
+        reqCountEl.classList.toggle('complete', totalSelected === required);
+      } else {
+        reqCountEl.textContent = `${totalSelected} / ${required} selected (+${extraCount} Extra: +$${extraSidesCost.toFixed(2)})`;
+        reqCountEl.classList.remove('complete');
+        reqCountEl.classList.add('extra-active'); // Turns RED to indicate extra sides
+      }
+
+      confirmBtn.textContent = `Add to Order — $${currentPrice.toFixed(2)}`;
     }
 
-    function updateExtUI() {
-      const cost = extTotal() * extraSidePrice;
-      document.getElementById('extra-sides-cost').textContent =
-        extTotal() > 0 ? `+$${cost.toFixed(2)}` : '';
+    if (meatCheckEl) {
+      meatCheckEl.addEventListener('change', updateUI);
     }
 
-    buildRequiredList();
-    buildExtraList();
-    updateReqUI();
-    updateExtUI();
+    buildSidesList();
+    updateUI();
 
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    // Trap Focus
+    // Focus Trap
     const focusableElements = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
     const firstFocusable = focusableElements[0];
-    const lastFocusable = focusableElements[focusableElements.length - 1];
-    
+    const lastFocusable  = focusableElements[focusableElements.length - 1];
+
     function trapFocus(e) {
       if (e.key === 'Tab') {
         if (e.shiftKey) {
@@ -251,40 +289,71 @@
           if (document.activeElement === lastFocusable) { e.preventDefault(); firstFocusable.focus(); }
         }
       }
+      if (e.key === 'Escape') closeModal();
     }
     modal.addEventListener('keydown', trapFocus);
     if (firstFocusable) firstFocusable.focus();
 
-    // ── Confirm ───────────────────────────────────────────
+    // ── Confirm Handler ───────────────────────────────────
     function handleConfirm() {
-      const total = reqTotal();
-      if (total !== required) {
-        errorEl.textContent = `Please choose exactly ${required} side${required !== 1 ? 's' : ''}.`;
+      const totalSelected = totalSidesSelected();
+      if (totalSelected < required) {
+        errorEl.textContent = `Please choose at least ${required} included side${required !== 1 ? 's' : ''}.`;
         errorEl.classList.remove('hidden');
         return;
       }
 
-      const extraMeatChecked = document.getElementById('extra-meat-check').checked;
+      let chosenFlavor = '';
+      if (isWingsItem) {
+        const checkedFlavor = modal.querySelector('input[name="wing-flavor"]:checked');
+        if (!checkedFlavor) {
+          errorEl.textContent = 'Please select a wing flavor.';
+          errorEl.classList.remove('hidden');
+          return;
+        }
+        chosenFlavor = checkedFlavor.value;
+      }
 
-      // Build sides label list (e.g. "Mac & Cheese x2")
-      const sidesArr = sidesPool
-        .filter(s => reqMap[s] > 0)
-        .map(s => reqMap[s] > 1 ? `${s} ×${reqMap[s]}` : s);
+      const extraMeatChecked = meatCheckEl ? meatCheckEl.checked : false;
+      const extraCount        = Math.max(0, totalSelected - required);
+      const extraSidesCost   = extraCount * extraSidePrice;
+      const extraMeatCost    = extraMeatChecked ? extraMeatPrice : 0;
+      const finalPrice       = item.price + extraSidesCost + extraMeatCost;
 
-      const extraSidesArr = sidesPool
-        .filter(s => extMap[s] > 0)
-        .map(s => extMap[s] > 1 ? `${s} ×${extMap[s]}` : s);
+      // Flatten selected sides into an ordered list
+      const flatSides = [];
+      sidesPool.forEach(side => {
+        for (let i = 0; i < sideMap[side]; i++) {
+          flatSides.push(side);
+        }
+      });
 
-      const extrasPrice = extTotal() * extraSidePrice + (extraMeatChecked ? extraMeatPrice : 0);
-      const notes       = notesEl.value.trim();
+      // Split into included vs extra sides
+      const includedRaw = flatSides.slice(0, required);
+      const extraRaw    = flatSides.slice(required);
+
+      // Group counts for clean display (e.g. "Mac & Cheese ×2")
+      function groupSides(arr) {
+        const counts = {};
+        arr.forEach(s => { counts[s] = (counts[s] || 0) + 1; });
+        return Object.keys(counts).map(s => counts[s] > 1 ? `${s} ×${counts[s]}` : s);
+      }
+
+      const sidesArr      = groupSides(includedRaw);
+      const extraSidesArr = groupSides(extraRaw);
+
+      let itemName = item.name.trim();
+      if (chosenFlavor) {
+        itemName += ` (${chosenFlavor})`;
+      }
 
       Cart.add({
-        name:        item.name,
-        price:       item.price + extrasPrice,
+        name:        itemName,
+        price:       finalPrice,
         sides:       sidesArr,
         extraSides:  extraSidesArr,
         extraMeat:   extraMeatChecked,
-        notes,
+        notes:       notesEl.value.trim(),
       });
 
       closeModal();
@@ -294,7 +363,8 @@
     function closeModal() {
       modal.classList.remove('open');
       document.body.style.overflow = '';
-      sidesPool.forEach(s => { reqMap[s] = 0; extMap[s] = 0; });
+      sidesPool.forEach(s => { sideMap[s] = 0; });
+      if (meatCheckEl) meatCheckEl.removeEventListener('change', updateUI);
       confirmBtn.removeEventListener('click', handleConfirm);
       cancelBtn.removeEventListener('click', closeModal);
       closeXBtn.removeEventListener('click', closeModal);
@@ -376,6 +446,7 @@
   const data = await fetchData();
   menuData   = data.menu;
   sidesPool  = data.sides;
+  saucesPool = data.sauces;
 
   const categories = [...new Set(menuData.map(i => i.category))];
   renderTabs(categories, 'All');

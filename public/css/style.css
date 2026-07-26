@@ -883,16 +883,65 @@ input, textarea, select { font-family: inherit; font-size: 1rem; outline: none; 
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--gray-400);
-  transition: color 0.2s;
+  transition: all 0.2s;
 }
-.sides-req-count.complete { color: var(--red); }
+.sides-req-count.complete { color: var(--black); font-weight: 700; }
+.sides-req-count.extra-active { color: var(--red); font-weight: 700; }
 
-/* Extra sides running cost */
-.sides-extra-cost {
-  font-family: var(--font-primary);
-  font-size: 0.78rem;
-  color: var(--red);
+/* Flavor options radio selector */
+.flavor-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+.flavor-option {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--gray-200);
+  cursor: pointer;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+.flavor-option:hover {
+  border-color: var(--gray-400);
+}
+.flavor-option input[type="radio"] {
+  display: none;
+}
+.flavor-option__box {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+  flex-shrink: 0;
+}
+.flavor-option__check {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--red);
+  transform: scale(0);
+  transition: transform 0.15s ease;
+}
+.flavor-option input:checked + .flavor-option__box {
+  border-color: var(--red);
+}
+.flavor-option input:checked + .flavor-option__box .flavor-option__check {
+  transform: scale(1);
+}
+.flavor-option input:checked ~ .flavor-option__name {
   font-weight: 700;
+  color: var(--black);
+}
+.flavor-option__name {
+  font-family: var(--font-body);
+  font-size: 0.9rem;
 }
 
 /* Stepper row */
