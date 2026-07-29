@@ -25,6 +25,14 @@
     return key !== undefined ? row[key] : undefined;
   }
 
+  // ── Helper to check if item is available ──
+  function isItemAvailable(val) {
+    if (val === false || val === 'false' || val === 'FALSE' || val === 0 || val === '0') return false;
+    if (val === true || val === 'true' || val === 'TRUE' || val === 1 || val === '1') return true;
+    if (val === undefined || val === null || String(val).trim() === '') return true;
+    return String(val).trim().toUpperCase() !== 'FALSE';
+  }
+
   // ── Fetch ─────────────────────────────────────────────────
   async function fetchData() {
     const url = CONFIG.SHEETS_URL;
@@ -55,7 +63,7 @@
             ? parseInt(rawSides, 10) 
             : 3;
 
-          const isAvailable = rawAvail === undefined || rawAvail === null || String(rawAvail).trim() === '' || String(rawAvail).toUpperCase() !== 'FALSE';
+          const isAvail = isItemAvailable(rawAvail);
 
           return {
             category:       rawCat || 'Other',
@@ -66,7 +74,7 @@
             sides:          isNaN(sidesCount) ? 3 : sidesCount,
             protein_prompt: rawProtein,
             sauce_prompt:   rawSauce,
-            available:      isAvailable,
+            available:      isAvail,
           };
         })
         // Drop rows with no name or marked unavailable
@@ -83,7 +91,7 @@
       rawSidesItems.forEach(s => {
         const nameVal = String(getSheetValue(s, 'name') || '').trim();
         const avail   = getSheetValue(s, 'available');
-        const isAvail = avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
+        const isAvail = isItemAvailable(avail);
 
         if (!nameVal) return;
 
