@@ -123,7 +123,7 @@ function doGet() {
     }
   }
 
-  // 2. If single-tab layout (e.g. "Very Ghood Menu" active sheet)
+  // 2. Single-tab layout support (Very Ghood Menu active sheet)
   if (!menu.length) {
     const sheet = ss.getSheets()[0];
     const allRows = sheet.getDataRange().getValues();
@@ -169,6 +169,67 @@ function doGet() {
   return ContentService
     .createTextOutput(JSON.stringify({ menu, sides, sauces }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+// ── Automated Editing via API (POST requests) ──────────────────────
+function doPost(e) {
+  try {
+    const data = JSON.parse(e.postData.contents);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const sheet = ss.getSheets()[0];
+    
+    const action = String(data.action || '').toLowerCase();
+    
+    if (action === 'add_item') {
+      const rows = sheet.getDataRange().getValues();
+      let insertRowIdx = -1;
+      
+      for (let i = 0; i < rows.length; i++) {
+        if (String(rows[i][0]).trim().toLowerCase() === 'name' && String(rows[i][1]).trim().toLowerCase() === 'available') {
+          insertRowIdx = i;
+          break;
+        }
+      }
+      
+      if (insertRowIdx > 0) {
+        sheet.insertRowBefore(insertRowIdx + 1);
+        sheet.getRange(insertRowIdx + 1, 1, 1, 8).setValues([[
+          data.category || 'Entrée',
+          data.name || '',
+          data.description || '',
+          data.price || 0,
+          data.type || 'entrée',
+          data.sides || 3,
+          data.available !== false ? 'TRUE' : 'FALSE',
+          data.protein_prompt ? 'TRUE' : ''
+        ]]);
+      }
+    } else if (action === 'update_available') {
+      const rows = sheet.getDataRange().getValues();
+      const targetName = String(data.name || '').trim().toLowerCase();
+      
+      for (let i = 0; i < rows.length; i++) {
+        const colAName = String(rows[i][0] || '').trim().toLowerCase();
+        const colBName = String(rows[i][1] || '').trim().toLowerCase();
+        
+        if (colBName === targetName) { // Menu item
+          sheet.getRange(i + 1, 7).setValue(data.available ? 'TRUE' : 'FALSE');
+          break;
+        } else if (colAName === targetName) { // Side or Sauce
+          sheet.getRange(i + 1, 2).setValue(data.available ? 'TRUE' : 'FALSE');
+          break;
+        }
+      }
+    }
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'success', action }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.message }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
 }
 ```
 
