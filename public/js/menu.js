@@ -17,6 +17,14 @@
   let sidesPool  = [];
   let saucesPool = [];
 
+  // ── Helper to safely extract property regardless of header case/whitespace ──
+  function getSheetValue(row, propName) {
+    if (!row || typeof row !== 'object') return undefined;
+    const target = propName.toLowerCase().trim();
+    const key = Object.keys(row).find(k => String(k).trim().toLowerCase() === target);
+    return key !== undefined ? row[key] : undefined;
+  }
+
   // ── Fetch ─────────────────────────────────────────────────
   async function fetchData() {
     const url = CONFIG.SHEETS_URL;
@@ -30,33 +38,56 @@
       const res  = await fetch(fetchUrl, { cache: 'no-store' });
       const json = await res.json();
 
-      const menu = (json.menu || [])
+      const rawMenuItems = Array.isArray(json.menu) ? json.menu : (Array.isArray(json.Menu) ? json.Menu : []);
+      const menu = rawMenuItems
         .map(r => {
-          const rawName = r.name || r.Name || '';
+          const rawName = String(getSheetValue(r, 'name') || '').trim();
+          const rawCat  = String(getSheetValue(r, 'category') || 'Other').trim();
+          const rawDesc = String(getSheetValue(r, 'description') || '').trim();
+          const rawPrice= getSheetValue(r, 'price');
+          const rawType = String(getSheetValue(r, 'type') || 'standalone').toLowerCase().trim();
+          const rawSides= getSheetValue(r, 'sides');
+          const rawProtein = String(getSheetValue(r, 'protein_prompt') || '').toUpperCase() === 'TRUE';
+          const rawSauce   = String(getSheetValue(r, 'sauce_prompt') || '').toUpperCase() === 'TRUE' || rawName.toLowerCase().includes('wing');
+          const rawAvail   = getSheetValue(r, 'available');
+
+          const sidesCount = (rawSides !== undefined && rawSides !== null && rawSides !== '') 
+            ? parseInt(rawSides, 10) 
+            : 3;
+
+          const isAvailable = rawAvail === undefined || rawAvail === null || String(rawAvail).trim() === '' || String(rawAvail).toUpperCase() !== 'FALSE';
+
           return {
-            category:       r.category       || r.Category       || 'Other',
+            category:       rawCat || 'Other',
             name:           rawName,
-            description:    r.description    || r.Description    || '',
-            price:          parseFloat(r.price || r.Price        || 0),
-            type:           (r.type  || r.Type  || 'standalone').toLowerCase().trim(),
-            sides:          (r.sides !== undefined && r.sides !== '') ? parseInt(r.sides, 10) : ((r.Sides !== undefined && r.Sides !== '') ? parseInt(r.Sides, 10) : 3),
-            protein_prompt: String(r.protein_prompt || r.Protein_prompt || '').toUpperCase() === 'TRUE',
-            sauce_prompt:   String(r.sauce_prompt || r.Sauce_prompt || '').toUpperCase() === 'TRUE' || rawName.toLowerCase().includes('wing'),
-            // available col: blank/missing = shown; FALSE = hidden
-            available:      String(r.available || r.Available || 'true').toUpperCase() !== 'FALSE',
+            description:    rawDesc,
+            price:          parseFloat(rawPrice || 0),
+            type:           rawType,
+            sides:          isNaN(sidesCount) ? 3 : sidesCount,
+            protein_prompt: rawProtein,
+            sauce_prompt:   rawSauce,
+            available:      isAvailable,
           };
         })
         // Drop rows with no name or marked unavailable
         .filter(r => r.name && r.available);
 
-      const sides = (json.sides || [])
-        .filter(s => String(s.available || s.Available || 'true').toUpperCase() !== 'FALSE')
-        .map(s => s.name || s.Name || '')
+      const rawSidesItems = Array.isArray(json.sides) ? json.sides : (Array.isArray(json.Sides) ? json.Sides : []);
+      const sides = rawSidesItems
+        .filter(s => {
+          const avail = getSheetValue(s, 'available');
+          return avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
+        })
+        .map(s => String(getSheetValue(s, 'name') || '').trim())
         .filter(Boolean);
 
-      let sauces = (json.sauces || json.flavors || [])
-        .filter(s => String(s.available || s.Available || 'true').toUpperCase() !== 'FALSE')
-        .map(s => s.name || s.Name || '')
+      const rawSaucesItems = Array.isArray(json.sauces) ? json.sauces : (Array.isArray(json.Sauces) ? json.Sauces : (Array.isArray(json.flavors) ? json.flavors : []));
+      let sauces = rawSaucesItems
+        .filter(s => {
+          const avail = getSheetValue(s, 'available');
+          return avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
+        })
+        .map(s => String(getSheetValue(s, 'name') || '').trim())
         .filter(Boolean);
 
       if (!sauces.length) {
