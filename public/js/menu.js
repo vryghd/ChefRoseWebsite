@@ -73,22 +73,46 @@
         .filter(r => r.name && r.available);
 
       const rawSidesItems = Array.isArray(json.sides) ? json.sides : (Array.isArray(json.Sides) ? json.Sides : []);
-      const sides = rawSidesItems
-        .filter(s => {
-          const avail = getSheetValue(s, 'available');
-          return avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
-        })
-        .map(s => String(getSheetValue(s, 'name') || '').trim())
-        .filter(Boolean);
+      
+      const knownSauceNames = ['peach teriyaki', 'sweet chili', 'plain cajun', 'hennessy bbq', 'lemon pepper', 'buffalo', 'bbq', 'garlic parmesan'];
+
+      let extractedSides  = [];
+      let extractedSauces = [];
+      let foundSaucesHeader = false;
+
+      rawSidesItems.forEach(s => {
+        const nameVal = String(getSheetValue(s, 'name') || '').trim();
+        const avail   = getSheetValue(s, 'available');
+        const isAvail = avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
+
+        if (!nameVal) return;
+
+        // If a second "name" header row appears in the list (marking the sauces section)
+        if (nameVal.toLowerCase() === 'name') {
+          foundSaucesHeader = true;
+          return;
+        }
+
+        if (foundSaucesHeader || knownSauceNames.includes(nameVal.toLowerCase())) {
+          if (isAvail) extractedSauces.push(nameVal);
+        } else {
+          if (isAvail) extractedSides.push(nameVal);
+        }
+      });
+
+      const sides = extractedSides;
 
       const rawSaucesItems = Array.isArray(json.sauces) ? json.sauces : (Array.isArray(json.Sauces) ? json.Sauces : (Array.isArray(json.flavors) ? json.flavors : []));
-      let sauces = rawSaucesItems
-        .filter(s => {
-          const avail = getSheetValue(s, 'available');
-          return avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
-        })
-        .map(s => String(getSheetValue(s, 'name') || '').trim())
-        .filter(Boolean);
+      rawSaucesItems.forEach(s => {
+        const nameVal = String(getSheetValue(s, 'name') || '').trim();
+        const avail   = getSheetValue(s, 'available');
+        const isAvail = avail === undefined || avail === null || String(avail).trim() === '' || String(avail).toUpperCase() !== 'FALSE';
+        if (nameVal && nameVal.toLowerCase() !== 'name' && isAvail && !extractedSauces.includes(nameVal)) {
+          extractedSauces.push(nameVal);
+        }
+      });
+
+      let sauces = extractedSauces;
 
       if (!sauces.length) {
         sauces = (CONFIG.SAMPLE_SAUCES || [])
