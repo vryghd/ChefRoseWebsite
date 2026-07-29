@@ -78,36 +78,91 @@ Example rows:
 function doGet() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  // ── Menu tab ─────────────────────────────────────────────
-  const menuSheet = ss.getSheetByName('Menu');
-  const menuRows  = menuSheet.getDataRange().getValues();
-  const menuHdrs  = menuRows[0];
-  const menu = menuRows.slice(1).map(row => {
-    const obj = {};
-    menuHdrs.forEach((h, i) => obj[h] = row[i]);
-    return obj;
-  });
-
-  // ── Sides tab ─────────────────────────────────────────────
-  const sidesSheet = ss.getSheetByName('Sides');
-  const sidesRows  = sidesSheet.getDataRange().getValues();
-  const sidesHdrs  = sidesRows[0];
-  const sides = sidesRows.slice(1).map(row => {
-    const obj = {};
-    sidesHdrs.forEach((h, i) => obj[h] = row[i]);
-    return obj;
-  });
-
-  // ── Sauces tab ─────────────────────────────────────────────
-  const saucesSheet = ss.getSheetByName('Sauces') || ss.getSheetByName('Flavors');
+  let menu = [];
+  let sides = [];
   let sauces = [];
+
+  // 1. Try multi-tab setup first ('Menu', 'Sides', 'Sauces')
+  const menuSheet   = ss.getSheetByName('Menu');
+  const sidesSheet  = ss.getSheetByName('Sides');
+  const saucesSheet = ss.getSheetByName('Sauces') || ss.getSheetByName('Flavors');
+
+  if (menuSheet) {
+    const rows = menuSheet.getDataRange().getValues();
+    if (rows.length > 1) {
+      const hdrs = rows[0].map(h => String(h).trim());
+      menu = rows.slice(1).map(row => {
+        const obj = {};
+        hdrs.forEach((h, i) => { if (h) obj[h] = row[i]; });
+        return obj;
+      });
+    }
+  }
+
+  if (sidesSheet) {
+    const rows = sidesSheet.getDataRange().getValues();
+    if (rows.length > 1) {
+      const hdrs = rows[0].map(h => String(h).trim());
+      sides = rows.slice(1).map(row => {
+        const obj = {};
+        hdrs.forEach((h, i) => { if (h) obj[h] = row[i]; });
+        return obj;
+      });
+    }
+  }
+
   if (saucesSheet) {
-    const saucesRows = saucesSheet.getDataRange().getValues();
-    const saucesHdrs = saucesRows[0];
-    sauces = saucesRows.slice(1).map(row => {
-      const obj = {};
-      saucesHdrs.forEach((h, i) => obj[h] = row[i]);
-      return obj;
+    const rows = saucesSheet.getDataRange().getValues();
+    if (rows.length > 1) {
+      const hdrs = rows[0].map(h => String(h).trim());
+      sauces = rows.slice(1).map(row => {
+        const obj = {};
+        hdrs.forEach((h, i) => { if (h) obj[h] = row[i]; });
+        return obj;
+      });
+    }
+  }
+
+  // 2. If single-tab layout (e.g. "Very Ghood Menu" active sheet)
+  if (!menu.length) {
+    const sheet = ss.getSheets()[0];
+    const allRows = sheet.getDataRange().getValues();
+
+    let currentTable = null;
+    let currentHdrs  = [];
+
+    allRows.forEach(row => {
+      const firstCell = String(row[0] || '').trim().toLowerCase();
+
+      if (firstCell === 'category') {
+        currentTable = 'menu';
+        currentHdrs  = row.map(h => String(h).trim());
+        return;
+      } else if (firstCell === 'name') {
+        const secondCell = String(row[1] || '').trim().toLowerCase();
+        if (secondCell === 'available') {
+          if (sides.length === 0) {
+            currentTable = 'sides';
+          } else {
+            currentTable = 'sauces';
+          }
+          currentHdrs = row.map(h => String(h).trim());
+          return;
+        }
+      }
+
+      if (currentTable && row.some(cell => String(cell).trim() !== '')) {
+        const obj = {};
+        currentHdrs.forEach((h, i) => { if (h) obj[h] = row[i]; });
+
+        if (currentTable === 'menu' && obj['name']) {
+          menu.push(obj);
+        } else if (currentTable === 'sides' && obj['name']) {
+          sides.push(obj);
+        } else if (currentTable === 'sauces' && obj['name']) {
+          sauces.push(obj);
+        }
+      }
     });
   }
 
